@@ -9,6 +9,8 @@ using Google.Apis.Services;
 using Google.Apis.Tasks.v1;
 using Google.Apis.Tasks.v1.Data;
 using Google.Apis.Util.Store;
+using GoogleTasksSynchronizer.DataAbstraction;
+using GoogleTasksSynchronizer.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Blob;
@@ -28,12 +30,19 @@ namespace GoogleTasksSyncronizer
             [Blob("jschaferfunctions/googleTasksSynchronizerState.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob googleTasksSynchronizerState, 
             TraceWriter log)
         {
-            log.Info($"C# Timer trigger function executed at: {DateTime.Now}");
+            log.Info($"SyncGoogleTasks Timer trigger function started at: {DateTime.Now}");
 
-            //Microsoft.WindowsAzure.Storage.File.CloudFile cloudFile = null;
+            ITasksSynchronizerStateManager tasksSynchronizerStateManager = null;
 
-            await googleTasksSynchronizerState.UploadTextAsync("{\"test\":\"testValue\"}");
+            TasksSynchronizerState tasksSynchronizerState = await tasksSynchronizerStateManager.SelectTasksSynchronizerStateAsync();
 
+            //DO STUFF
+
+            await tasksSynchronizerStateManager.UpdateTasksSynchronizerStateAsync(tasksSynchronizerState);
+
+            log.Info($"SyncGoogleTasks Timer trigger function completed at: {DateTime.Now}");
+
+            return;
             //string googleClientSecretJson = Environment.GetEnvironmentVariable("GoogleClientSecret");
 
             //UserCredential credential;
@@ -79,7 +88,6 @@ namespace GoogleTasksSyncronizer
             //{
             //    log.Info("No task lists found.");
             //}
-
         }
     }
 }
