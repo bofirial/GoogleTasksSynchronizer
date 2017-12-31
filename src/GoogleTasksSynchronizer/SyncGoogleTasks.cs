@@ -11,7 +11,7 @@ using Google.Apis.Tasks.v1.Data;
 using Google.Apis.Util.Store;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
-
+using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace GoogleTasksSyncronizer
 {
@@ -20,58 +20,65 @@ namespace GoogleTasksSyncronizer
         // If modifying these scopes, delete your previously saved credentials
         // at ~/.credentials/tasks-dotnet-quickstart.json
         static string[] Scopes = { TasksService.Scope.TasksReadonly };
-        static string ApplicationName = "Google Tasks API Quickstart";
+        //static string ApplicationName = "Google Tasks API Quickstart";
 
         [FunctionName("SyncGoogleTasks")]
-        public static void Run([TimerTrigger("*/5 * 6-23 * * *")]TimerInfo myTimer, TraceWriter log)
+        public async static void Run(
+            [TimerTrigger("*/5 * 6-23 * * *")]TimerInfo myTimer, 
+            [Blob("jschaferfunctions/googleTasksSynchronizerState.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob googleTasksSynchronizerState, 
+            TraceWriter log)
         {
             log.Info($"C# Timer trigger function executed at: {DateTime.Now}");
 
-            UserCredential credential;
+            //Microsoft.WindowsAzure.Storage.File.CloudFile cloudFile = null;
 
-            string googleClientSecretJson = Environment.GetEnvironmentVariable("GoogleClientSecret");
+            await googleTasksSynchronizerState.UploadTextAsync("{\"test\":\"testValue\"}");
 
-            Stream memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(googleClientSecretJson));
+            //string googleClientSecretJson = Environment.GetEnvironmentVariable("GoogleClientSecret");
 
-            GoogleClientSecrets googleClientSecrets = new GoogleClientSecrets();
+            //UserCredential credential;
 
-            string credPath = System.Environment.GetFolderPath(
-                System.Environment.SpecialFolder.Personal);
-            credPath = Path.Combine(credPath, ".credentials/tasks-dotnet-quickstart.json");
+            //Stream memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(googleClientSecretJson));
 
-            credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                GoogleClientSecrets.Load(memoryStream).Secrets,
-                Scopes,
-                "user",
-                CancellationToken.None,
-                new FileDataStore(credPath, true)).Result;
-            log.Info("Credential file saved to: " + credPath);
+            //GoogleClientSecrets googleClientSecrets = new GoogleClientSecrets();
 
-            // Create Google Tasks API service.
-            var service = new TasksService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = ApplicationName,
-            });
+            //string credPath = System.Environment.GetFolderPath(
+            //    System.Environment.SpecialFolder.Personal);
+            //credPath = Path.Combine(credPath, ".credentials/tasks-dotnet-quickstart.json");
 
-            // Define parameters of request.
-            TasklistsResource.ListRequest listRequest = service.Tasklists.List();
-            listRequest.MaxResults = 10;
+            //credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+            //    GoogleClientSecrets.Load(memoryStream).Secrets,
+            //    Scopes,
+            //    "user",
+            //    CancellationToken.None,
+            //    new FileDataStore(credPath, true)).Result;
+            //log.Info("Credential file saved to: " + credPath);
 
-            // List task lists.
-            IList<TaskList> taskLists = listRequest.Execute().Items;
-            log.Info("Task Lists:");
-            if (taskLists != null && taskLists.Count > 0)
-            {
-                foreach (var taskList in taskLists)
-                {
-                    log.Info($"{taskList.Title} ({taskList.Id})");
-                }
-            }
-            else
-            {
-                log.Info("No task lists found.");
-            }
+            //// Create Google Tasks API service.
+            //var service = new TasksService(new BaseClientService.Initializer()
+            //{
+            //    HttpClientInitializer = credential,
+            //    ApplicationName = ApplicationName,
+            //});
+
+            //// Define parameters of request.
+            //TasklistsResource.ListRequest listRequest = service.Tasklists.List();
+            //listRequest.MaxResults = 10;
+
+            //// List task lists.
+            //IList<TaskList> taskLists = listRequest.Execute().Items;
+            //log.Info("Task Lists:");
+            //if (taskLists != null && taskLists.Count > 0)
+            //{
+            //    foreach (var taskList in taskLists)
+            //    {
+            //        log.Info($"{taskList.Title} ({taskList.Id})");
+            //    }
+            //}
+            //else
+            //{
+            //    log.Info("No task lists found.");
+            //}
 
         }
     }
