@@ -32,7 +32,7 @@ namespace GoogleTasksSyncronizer
         {
             log.Info($"SyncGoogleTasks Timer trigger function started at: {DateTime.Now}");
 
-            ITasksSynchronizerStateManager tasksSynchronizerStateManager = null;
+            ITasksSynchronizerStateManager tasksSynchronizerStateManager = new TasksSynchronizerStateManager(googleTasksSynchronizerState, log);
 
             TasksSynchronizerState tasksSynchronizerState = await tasksSynchronizerStateManager.SelectTasksSynchronizerStateAsync();
 
