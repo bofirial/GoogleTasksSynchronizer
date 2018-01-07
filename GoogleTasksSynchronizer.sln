@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27205.2004
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleTasksSynchronizer", "src\GoogleTasksSynchronizer\GoogleTasksSynchronizer.csproj", "{A1FF51E3-CA76-45C5-85AE-7DDEAE32DC69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleTasksSynchronizer", "src\GoogleTasksSynchronizer\GoogleTasksSynchronizer.csproj", "{A1FF51E3-CA76-45C5-85AE-7DDEAE32DC69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

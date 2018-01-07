@@ -2,13 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using Google.Apis.Services;
 using Google.Apis.Tasks.v1;
 using Google.Apis.Tasks.v1.Data;
 using GoogleTasksSynchronizer.DataAbstraction;
 using GoogleTasksSynchronizer.Google;
 using GoogleTasksSynchronizer.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
@@ -18,8 +21,8 @@ namespace GoogleTasksSynchronizer
     public static class SyncGoogleTasks
     {
         [FunctionName("SyncGoogleTasks")]
-        public static async System.Threading.Tasks.Task Run(
-            [TimerTrigger("*/15 * 6-23 * * *")]TimerInfo myTimer, 
+        public static async System.Threading.Tasks.Task<HttpResponseMessage> Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]HttpRequestMessage req,
             [Blob("jschaferfunctions/googleTasksSynchronizerState.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob googleTasksSynchronizerState, 
             TraceWriter log)
         {
@@ -65,7 +68,8 @@ namespace GoogleTasksSynchronizer
             await tasksSynchronizerStateManager.UpdateTasksSynchronizerStateAsync(tasksSynchronizerState);
 
             log.Info($"SyncGoogleTasks Timer trigger function completed at: {DateTime.Now}");
-            
+
+            return req.CreateResponse();
 
             //static string ApplicationName = "Google Tasks API Quickstart";
 
