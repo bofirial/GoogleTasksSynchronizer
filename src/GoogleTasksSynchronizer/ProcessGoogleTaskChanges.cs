@@ -5,6 +5,7 @@ using System.Linq;
 using Google.Apis.Services;
 using Google.Apis.Tasks.v1;
 using Google.Apis.Tasks.v1.Data;
+using GoogleTasksSynchronizer.BusinessLogic;
 using GoogleTasksSynchronizer.DataAbstraction;
 using GoogleTasksSynchronizer.Google;
 using GoogleTasksSynchronizer.Models;
@@ -29,45 +30,51 @@ namespace GoogleTasksSynchronizer
 
             TasksSynchronizerState tasksSynchronizerState = await tasksSynchronizerStateManager.SelectTasksSynchronizerStateAsync();
 
+            ITaskBusinessManager taskBusinessManager = new TaskBusinessManager(tasksSynchronizerState);
+
             IGoogleTaskAccountManager googleTaskAccountManager = new GoogleTaskAccountManager();
 
             List<TaskAccount> taskAccounts = googleTaskAccountManager.GetTaskAccounts(tasksSynchronizerState);
 
+            foreach (var taskAccount in taskAccounts)
+            {
+                TasksService taskService = new TasksService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = taskAccount.UserCredential,
+                    ApplicationName = "JSchafer Google Tasks Synchronizer",
+                });
 
+                TasksResource.ListRequest listRequest = taskService.Tasks.List(taskAccount.TaskListId);
 
-            //List<Task> createdTasks = new List<Task>();
-            //List<Task> deletedTasks = new List<Task>();
+                listRequest.ShowCompleted = true;
+                listRequest.ShowDeleted = true;
+                listRequest.ShowHidden = true;
+                listRequest.UpdatedMin = DateTime.Today.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
 
-            //foreach (var taskAccount in taskAccounts)
-            //{
-            //    TasksService taskService = new TasksService(new BaseClientService.Initializer()
-            //    {
-            //        HttpClientInitializer = taskAccount.UserCredential,
-            //        ApplicationName = "JSchafer Google Tasks Synchronizer",
-            //    });
+                taskAccount.GoogleTasks = listRequest.Execute().Items;
 
-            //    TasksResource.ListRequest listRequest = taskService.Tasks.List(taskAccount.TaskListId);
+                log.Info($"{taskAccount.GoogleTasks?.Count ?? 0} updated tasks today for {taskAccount.AccountName}");
 
-            //    taskAccount.GoogleTasks = listRequest.Execute().Items;
+                if (taskAccount.GoogleTasks != null)
+                {
+                    foreach (Task task in taskAccount.GoogleTasks)
+                    {
+                        Task storedTask = taskBusinessManager.GetStoredTaskById(task.Id);
 
-            //    log.Info($"{taskAccount.GoogleTasks.Count} tasks for {taskAccount.AccountName}");
+                        if (null == storedTask)
+                        {
+                            //New Task
+                            log.Info("Found a New Task!");
+                        }
 
-            //    foreach (Task taskFromGoogle in taskAccount.GoogleTasks)
-            //    {
-            //        if (!tasksSynchronizerState.CurrentTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(taskFromGoogle, t)))
-            //        {
-            //            createdTasks.Add(taskFromGoogle);
-            //        }
-            //    }
-
-            //    foreach (Task currentTask in tasksSynchronizerState.CurrentTasks)
-            //    {
-            //        if (!taskAccount.GoogleTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(currentTask, t)))
-            //        {
-            //            deletedTasks.Add(currentTask);
-            //        }
-            //    }
-            //}
+                        if (!taskBusinessManager.TasksAreLogicallyEqual(task, storedTask))
+                        {
+                            //Modified Task
+                            log.Info("Found a Modified Task!");
+                        }
+                    }
+                }
+            }
 
 
             log.Info($"ProcessGoogleTaskChanges Timer trigger function completed at: {DateTime.Now}");

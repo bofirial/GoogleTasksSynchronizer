@@ -38,7 +38,7 @@ namespace GoogleTasksSynchronizer
 
             List<TaskAccount> taskAccounts = googleTaskAccountManager.GetTaskAccounts(tasksSynchronizerState);
 
-            ITaskBusinessManager taskBusinessManager = new TaskBusinessManager();
+            ITaskBusinessManager taskBusinessManager = new TaskBusinessManager(tasksSynchronizerState);
 
             List<Task> createdTasks = new List<Task>();
             List<Task> deletedTasks = new List<Task>();
@@ -101,6 +101,10 @@ namespace GoogleTasksSynchronizer
                             Due = createdTask.Due,
                             Status = createdTask.Status,
                             DueRaw = createdTask.DueRaw,
+                            Deleted = createdTask.Deleted,
+                            Hidden = createdTask.Hidden,
+                            Completed = createdTask.Completed,
+                            CompletedRaw = createdTask.CompletedRaw,
                         };
 
                         TasksResource.InsertRequest insertRequest = taskService.Tasks.Insert(newTask, taskAccount.TaskListId);

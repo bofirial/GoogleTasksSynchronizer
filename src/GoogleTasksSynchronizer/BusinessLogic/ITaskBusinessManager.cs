@@ -7,5 +7,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
     public interface ITaskBusinessManager
     {
         bool TasksAreLogicallyEqual(params Task[] tasks);
+
+        Task GetStoredTaskById(string taskId);
     }
 }
