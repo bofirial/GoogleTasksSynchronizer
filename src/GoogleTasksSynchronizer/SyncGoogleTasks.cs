@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using Google.Apis.Services;
 using Google.Apis.Tasks.v1;
 using Google.Apis.Tasks.v1.Data;
+using GoogleTasksSynchronizer.BusinessLogic;
 using GoogleTasksSynchronizer.DataAbstraction;
 using GoogleTasksSynchronizer.Google;
 using GoogleTasksSynchronizer.Models;
@@ -36,9 +38,10 @@ namespace GoogleTasksSynchronizer
 
             List<TaskAccount> taskAccounts = googleTaskAccountManager.GetTaskAccounts(tasksSynchronizerState);
 
-            //DO STUFF
+            ITaskBusinessManager taskBusinessManager = new TaskBusinessManager();
 
-            
+            List<Task> createdTasks = new List<Task>();
+            List<Task> deletedTasks = new List<Task>();
 
             foreach (var taskAccount in taskAccounts)
             {
@@ -50,54 +53,94 @@ namespace GoogleTasksSynchronizer
 
                 TasksResource.ListRequest listRequest = taskService.Tasks.List(taskAccount.TaskListId);
 
-                listRequest.ShowDeleted = true;
-                listRequest.ShowCompleted = true;
-                listRequest.ShowHidden = true;
-                //listRequest.UpdatedMin = tasksSynchronizerState.LastQueryTime.ToString();
+                taskAccount.GoogleTasks = listRequest.Execute().Items;
+                
+                log.Info($"{taskAccount.GoogleTasks.Count} tasks for {taskAccount.AccountName}");
 
-                var execute = listRequest.Execute();
-                IList<Task> tasks = execute.Items;
+                foreach (Task taskFromGoogle in taskAccount.GoogleTasks)
+                {
+                    if (!tasksSynchronizerState.CurrentTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(taskFromGoogle, t)))
+                    {
+                        createdTasks.Add(taskFromGoogle);
+                    }
+                }
 
-                break;
+                foreach (Task currentTask in tasksSynchronizerState.CurrentTasks)
+                {
+                    if (!taskAccount.GoogleTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(currentTask, t)))
+                    {
+                        deletedTasks.Add(currentTask);
+                    }
+                }
             }
 
+            log.Info($"{createdTasks.Count} tasks to create.");
 
+            foreach (var createdTask in createdTasks)
+            {
+                tasksSynchronizerState.CurrentTasks.Add(createdTask);
 
-            //END DO STUFF
+                foreach (TaskAccount taskAccount in taskAccounts)
+                {
+                    if (!taskAccount.GoogleTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(createdTask, t)))
+                    {
+                        log.Info($"\tNew Task \"{createdTask.Title}\" for {taskAccount.AccountName}.");
+
+                        TasksService taskService = new TasksService(new BaseClientService.Initializer()
+                        {
+                            HttpClientInitializer = taskAccount.UserCredential,
+                            ApplicationName = "JSchafer Google Tasks Synchronizer",
+                        });
+
+                        Task newTask = new Task()
+                        {
+                            Title = createdTask.Title,
+                            Notes = createdTask.Notes,
+                            Due = createdTask.Due,
+                            Status = createdTask.Status,
+                            DueRaw = createdTask.DueRaw,
+                        };
+
+                        TasksResource.InsertRequest insertRequest = taskService.Tasks.Insert(newTask, taskAccount.TaskListId);
+
+                        insertRequest.Execute();
+                    }
+                }
+            }
+
+            log.Info($"{deletedTasks.Count} tasks to delete.");
+
+            foreach (var deletedTask in deletedTasks)
+            {
+                tasksSynchronizerState.CurrentTasks.RemoveAll(t =>
+                    taskBusinessManager.TasksAreLogicallyEqual(deletedTask, t));
+
+                foreach (TaskAccount taskAccount in taskAccounts)
+                {
+                    IEnumerable<Task> googleTasksToDelete = taskAccount.GoogleTasks.Where(t => taskBusinessManager.TasksAreLogicallyEqual(deletedTask, t));
+
+                    foreach (Task taskToDelete in googleTasksToDelete)
+                    {
+                        log.Info($"\tDeleting Task \"{taskToDelete.Title}\" for {taskAccount.AccountName}.");
+
+                        TasksService taskService = new TasksService(new BaseClientService.Initializer()
+                        {
+                            HttpClientInitializer = taskAccount.UserCredential,
+                            ApplicationName = "JSchafer Google Tasks Synchronizer",
+                        });
+
+                        TasksResource.DeleteRequest deleteRequest = taskService.Tasks.Delete(taskAccount.TaskListId, taskToDelete.Id);
+
+                        deleteRequest.Execute();
+                    }
+                }
+            }
 
             await tasksSynchronizerStateManager.UpdateTasksSynchronizerStateAsync(tasksSynchronizerState);
 
             log.Info($"SyncGoogleTasks Timer trigger function completed at: {DateTime.Now}");
 
-            return req.CreateResponse();
-
-            //static string ApplicationName = "Google Tasks API Quickstart";
-
-            //// Create Google Tasks API service.
-            //var service = new TasksService(new BaseClientService.Initializer()
-            //{
-            //    HttpClientInitializer = credential,
-            //    ApplicationName = ApplicationName,
-            //});
-
-            //// Define parameters of request.
-            //TasklistsResource.ListRequest listRequest = service.Tasklists.List();
-            //listRequest.MaxResults = 10;
-
-            //// List task lists.
-            //IList<TaskList> taskLists = listRequest.Execute().Items;
-            //log.Info("Task Lists:");
-            //if (taskLists != null && taskLists.Count > 0)
-            //{
-            //    foreach (var taskList in taskLists)
-            //    {
-            //        log.Info($"{taskList.Title} ({taskList.Id})");
-            //    }
-            //}
-            //else
-            //{
-            //    log.Info("No task lists found.");
-            //}
+            return req.CreateResponse(HttpStatusCode.OK);
         }
     }
 }

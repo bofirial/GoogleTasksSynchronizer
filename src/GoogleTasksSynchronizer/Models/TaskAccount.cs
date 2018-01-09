@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Tasks.v1.Data;
 
 namespace GoogleTasksSynchronizer.Models
 {
@@ -12,5 +13,7 @@ namespace GoogleTasksSynchronizer.Models
         public string TaskListId { get; set; }
 
         internal UserCredential UserCredential { get; set; }
+
+        public IList<Task> GoogleTasks { get; set; }
     }
 }
