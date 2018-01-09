@@ -11,6 +11,6 @@ namespace GoogleTasksSynchronizer.Models
 
         public DateTime LastQueryTime { get; set; }
 
-        public List<Task> CurrentTasks { get; set; } = new List<Task>();
-     }
+        public List<CurrentTask> CurrentTasks { get; set; } = new List<CurrentTask>();
+    }
 }

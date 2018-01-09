@@ -23,19 +23,20 @@ namespace GoogleTasksSynchronizer
             [Blob("jschaferfunctions/googleTasksSynchronizerState.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob googleTasksSynchronizerState, 
             TraceWriter log)
         {
-            //log.Info($"SyncGoogleTasks Timer trigger function started at: {DateTime.Now}");
+            log.Info($"ProcessGoogleTaskChanges Timer trigger function started at: {DateTime.Now}");
 
-            //ITasksSynchronizerStateManager tasksSynchronizerStateManager = new TasksSynchronizerStateManager(googleTasksSynchronizerState, log);
+            ITasksSynchronizerStateManager tasksSynchronizerStateManager = new TasksSynchronizerStateManager(googleTasksSynchronizerState, log);
 
-            //TasksSynchronizerState tasksSynchronizerState = await tasksSynchronizerStateManager.SelectTasksSynchronizerStateAsync();
+            TasksSynchronizerState tasksSynchronizerState = await tasksSynchronizerStateManager.SelectTasksSynchronizerStateAsync();
 
-            //IGoogleTaskAccountManager googleTaskAccountManager = new GoogleTaskAccountManager();
+            IGoogleTaskAccountManager googleTaskAccountManager = new GoogleTaskAccountManager();
 
-            //List<TaskAccount> taskAccounts = googleTaskAccountManager.GetTaskAccounts(tasksSynchronizerState);
+            List<TaskAccount> taskAccounts = googleTaskAccountManager.GetTaskAccounts(tasksSynchronizerState);
 
-            ////DO STUFF
 
-            
+
+            //List<Task> createdTasks = new List<Task>();
+            //List<Task> deletedTasks = new List<Task>();
 
             //foreach (var taskAccount in taskAccounts)
             //{
@@ -47,53 +48,29 @@ namespace GoogleTasksSynchronizer
 
             //    TasksResource.ListRequest listRequest = taskService.Tasks.List(taskAccount.TaskListId);
 
-            //    listRequest.ShowDeleted = true;
-            //    listRequest.ShowCompleted = true;
-            //    listRequest.ShowHidden = true;
-            //    //listRequest.UpdatedMin = tasksSynchronizerState.LastQueryTime.ToString();
+            //    taskAccount.GoogleTasks = listRequest.Execute().Items;
 
-            //    var execute = listRequest.Execute();
-            //    IList<Task> tasks = execute.Items;
+            //    log.Info($"{taskAccount.GoogleTasks.Count} tasks for {taskAccount.AccountName}");
 
-            //    break;
+            //    foreach (Task taskFromGoogle in taskAccount.GoogleTasks)
+            //    {
+            //        if (!tasksSynchronizerState.CurrentTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(taskFromGoogle, t)))
+            //        {
+            //            createdTasks.Add(taskFromGoogle);
+            //        }
+            //    }
+
+            //    foreach (Task currentTask in tasksSynchronizerState.CurrentTasks)
+            //    {
+            //        if (!taskAccount.GoogleTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(currentTask, t)))
+            //        {
+            //            deletedTasks.Add(currentTask);
+            //        }
+            //    }
             //}
 
 
-
-            ////END DO STUFF
-
-            //////await tasksSynchronizerStateManager.UpdateTasksSynchronizerStateAsync(tasksSynchronizerState);
-
-            //////log.Info($"SyncGoogleTasks Timer trigger function completed at: {DateTime.Now}");
-            
-
-            //////static string ApplicationName = "Google Tasks API Quickstart";
-
-            //////// Create Google Tasks API service.
-            //////var service = new TasksService(new BaseClientService.Initializer()
-            //////{
-            //////    HttpClientInitializer = credential,
-            //////    ApplicationName = ApplicationName,
-            //////});
-
-            //////// Define parameters of request.
-            //////TasklistsResource.ListRequest listRequest = service.Tasklists.List();
-            //////listRequest.MaxResults = 10;
-
-            //////// List task lists.
-            //////IList<TaskList> taskLists = listRequest.Execute().Items;
-            //////log.Info("Task Lists:");
-            //////if (taskLists != null && taskLists.Count > 0)
-            //////{
-            //////    foreach (var taskList in taskLists)
-            //////    {
-            //////        log.Info($"{taskList.Title} ({taskList.Id})");
-            //////    }
-            //////}
-            //////else
-            //////{
-            //////    log.Info("No task lists found.");
-            //////}
+            log.Info($"ProcessGoogleTaskChanges Timer trigger function completed at: {DateTime.Now}");
         }
     }
 }

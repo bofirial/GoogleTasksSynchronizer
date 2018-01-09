@@ -59,17 +59,17 @@ namespace GoogleTasksSynchronizer
 
                 foreach (Task taskFromGoogle in taskAccount.GoogleTasks)
                 {
-                    if (!tasksSynchronizerState.CurrentTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(taskFromGoogle, t)))
+                    if (!tasksSynchronizerState.CurrentTasks.Any(c => taskBusinessManager.TasksAreLogicallyEqual(taskFromGoogle, c.Task)))
                     {
                         createdTasks.Add(taskFromGoogle);
                     }
                 }
 
-                foreach (Task currentTask in tasksSynchronizerState.CurrentTasks)
+                foreach (CurrentTask currentTask in tasksSynchronizerState.CurrentTasks)
                 {
-                    if (!taskAccount.GoogleTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(currentTask, t)))
+                    if (!taskAccount.GoogleTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(currentTask.Task, t)))
                     {
-                        deletedTasks.Add(currentTask);
+                        deletedTasks.Add(currentTask.Task);
                     }
                 }
             }
@@ -78,11 +78,13 @@ namespace GoogleTasksSynchronizer
 
             foreach (var createdTask in createdTasks)
             {
-                tasksSynchronizerState.CurrentTasks.Add(createdTask);
+                List<TaskIdentifier> taskIdentifiers = new List<TaskIdentifier>();
 
                 foreach (TaskAccount taskAccount in taskAccounts)
                 {
-                    if (!taskAccount.GoogleTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(createdTask, t)))
+                    Task[] tasks = taskAccount.GoogleTasks.Where(t => taskBusinessManager.TasksAreLogicallyEqual(createdTask, t)).ToArray();
+
+                    if (!tasks.Any())
                     {
                         log.Info($"\tNew Task \"{createdTask.Title}\" for {taskAccount.AccountName}.");
 
@@ -103,17 +105,29 @@ namespace GoogleTasksSynchronizer
 
                         TasksResource.InsertRequest insertRequest = taskService.Tasks.Insert(newTask, taskAccount.TaskListId);
 
-                        insertRequest.Execute();
+                        Task createdGoogleTask = insertRequest.Execute();
+
+                        taskIdentifiers.Add(new TaskIdentifier() {AccountName = taskAccount.AccountName, TaskId = createdGoogleTask.Id});
+                    }
+                    else
+                    {
+                        taskIdentifiers.AddRange(tasks.Select(t => new TaskIdentifier() { AccountName = taskAccount.AccountName, TaskId = t.Id }));
                     }
                 }
+
+                tasksSynchronizerState.CurrentTasks.Add(new CurrentTask()
+                {
+                    Task = createdTask,
+                    TaskIds = taskIdentifiers
+                });
             }
 
             log.Info($"{deletedTasks.Count} tasks to delete.");
 
             foreach (var deletedTask in deletedTasks)
             {
-                tasksSynchronizerState.CurrentTasks.RemoveAll(t =>
-                    taskBusinessManager.TasksAreLogicallyEqual(deletedTask, t));
+                tasksSynchronizerState.CurrentTasks.RemoveAll(c =>
+                    taskBusinessManager.TasksAreLogicallyEqual(deletedTask, c.Task));
 
                 foreach (TaskAccount taskAccount in taskAccounts)
                 {
