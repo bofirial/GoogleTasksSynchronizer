@@ -16,6 +16,13 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             _tasksSynchronizerState = tasksSynchronizerState;
         }
 
+        public bool TasksMustBeCleared(params Task[] tasks)
+        {
+            Task firstTask = tasks.FirstOrDefault();
+
+            return !tasks.All(t => t.Hidden == firstTask.Hidden);
+        }
+
         public bool TasksAreLogicallyEqual(params Task[] tasks)
         {
             Task firstTask = tasks.FirstOrDefault();
@@ -26,7 +33,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                    tasks.All(t => t.Status == firstTask?.Status) &&
 
                    tasks.All(t => t.Deleted == firstTask?.Deleted) &&
-                   tasks.All(t => t.Hidden == firstTask?.Hidden) &&
                    tasks.All(t => t.Completed == firstTask?.Completed);
         }
 

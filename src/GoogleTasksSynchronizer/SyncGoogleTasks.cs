@@ -102,7 +102,6 @@ namespace GoogleTasksSynchronizer
                             Status = createdTask.Status,
                             DueRaw = createdTask.DueRaw,
                             Deleted = createdTask.Deleted,
-                            Hidden = createdTask.Hidden,
                             Completed = createdTask.Completed,
                             CompletedRaw = createdTask.CompletedRaw,
                         };
