@@ -27,13 +27,13 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         {
             Task firstTask = tasks.FirstOrDefault();
 
-            return tasks.All(t => t.Title == firstTask?.Title) &&
-                   tasks.All(t => t.Due == firstTask?.Due) &&
-                   tasks.All(t => t.Notes == firstTask?.Notes) &&
-                   tasks.All(t => t.Status == firstTask?.Status) &&
+            return tasks.All(t => t?.Title == firstTask?.Title) &&
+                   tasks.All(t => t?.Due == firstTask?.Due) &&
+                   tasks.All(t => t?.Notes == firstTask?.Notes) &&
+                   tasks.All(t => t?.Status == firstTask?.Status) &&
 
-                   tasks.All(t => t.Deleted == firstTask?.Deleted) &&
-                   tasks.All(t => t.Completed == firstTask?.Completed);
+                   tasks.All(t => t?.Deleted == firstTask?.Deleted) &&
+                   tasks.All(t => t?.Completed == firstTask?.Completed);
         }
 
         public Task GetStoredTaskById(string taskId)
