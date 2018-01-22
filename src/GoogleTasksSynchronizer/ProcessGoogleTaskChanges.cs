@@ -50,12 +50,34 @@ namespace GoogleTasksSynchronizer
 
                 TasksResource.ListRequest listRequest = taskService.Tasks.List(taskAccount.TaskListId);
 
-                listRequest.ShowCompleted = true;
-                listRequest.ShowDeleted = true;
-                listRequest.ShowHidden = true;
+                if (Environment.GetEnvironmentVariable("IgnoreInvisibleMode") == "true")
+                {
+                    listRequest.ShowCompleted = false;
+                    listRequest.ShowDeleted = false;
+                    listRequest.ShowHidden = false; 
+                }
+                else
+                {
+                    listRequest.ShowCompleted = true;
+                    listRequest.ShowDeleted = true;
+                    listRequest.ShowHidden = true;
+                }
                 listRequest.UpdatedMin = DateTime.Today.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
 
-                taskAccount.GoogleTasks = listRequest.Execute().Items;
+                taskAccount.GoogleTasks = new List<Task>();
+
+                Tasks taskResult = null;
+
+                do
+                {
+                    listRequest.PageToken = taskResult?.NextPageToken;
+
+                    taskResult = listRequest.Execute();
+
+                    taskAccount.GoogleTasks.AddRange(taskResult.Items);
+
+                } while (taskResult?.NextPageToken != null);
+
 
                 log.Info($"{taskAccount.GoogleTasks?.Count ?? 0} updated tasks today for {taskAccount.AccountName}");
 
@@ -70,9 +92,13 @@ namespace GoogleTasksSynchronizer
                             clearedTasks.Add(task);
                         }
 
-                        if (null == storedTask && task.Hidden != true && task.Deleted != true)
+                        if (null == storedTask)
                         {
-                            createdTasks.Add(task);
+                            if (task.Hidden != true && task.Deleted != true)
+                            {
+                                createdTasks.Add(task); 
+                            }
+
                             continue;
                         }
 

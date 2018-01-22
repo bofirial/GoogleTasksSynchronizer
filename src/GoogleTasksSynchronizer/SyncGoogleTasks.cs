@@ -52,9 +52,21 @@ namespace GoogleTasksSynchronizer
                 });
 
                 TasksResource.ListRequest listRequest = taskService.Tasks.List(taskAccount.TaskListId);
-
-                taskAccount.GoogleTasks = listRequest.Execute().Items;
                 
+                taskAccount.GoogleTasks = new List<Task>();
+
+                Tasks taskResult = null;
+
+                do
+                {
+                    listRequest.PageToken = taskResult?.NextPageToken;
+
+                    taskResult = listRequest.Execute();
+
+                    taskAccount.GoogleTasks.AddRange(taskResult.Items);
+
+                } while (taskResult?.NextPageToken != null);
+
                 log.Info($"{taskAccount.GoogleTasks.Count} tasks for {taskAccount.AccountName}");
 
                 foreach (Task taskFromGoogle in taskAccount.GoogleTasks)
