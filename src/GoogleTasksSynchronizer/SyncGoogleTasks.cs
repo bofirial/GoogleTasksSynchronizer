@@ -63,7 +63,10 @@ namespace GoogleTasksSynchronizer
 
                     taskResult = listRequest.Execute();
 
-                    taskAccount.GoogleTasks.AddRange(taskResult.Items);
+                    if (null != taskResult?.Items)
+                    {
+                        taskAccount.GoogleTasks.AddRange(taskResult.Items); 
+                    }
 
                 } while (taskResult?.NextPageToken != null);
 
