@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Google.Apis.Tasks.v1;
 using Google.Apis.Tasks.v1.Data;
 using GoogleTasksSynchronizer.Models;
 
@@ -47,6 +48,28 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             }
 
             return null;
+        }
+
+        public List<Task> RequestAllGoogleTasks(TasksResource.ListRequest listRequest)
+        {
+            List<Task> tasks = new List<Task>();
+
+            Tasks taskResult = null;
+
+            do
+            {
+                listRequest.PageToken = taskResult?.NextPageToken;
+
+                taskResult = listRequest.Execute();
+
+                if (null != taskResult?.Items)
+                {
+                    tasks.AddRange(taskResult.Items);
+                }
+
+            } while (taskResult?.NextPageToken != null);
+
+            return tasks;
         }
     }
 }

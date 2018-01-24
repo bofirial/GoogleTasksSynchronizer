@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Google.Apis.Tasks.v1;
 using Google.Apis.Tasks.v1.Data;
 
 namespace GoogleTasksSynchronizer.BusinessLogic
@@ -11,5 +12,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         bool TasksAreLogicallyEqual(params Task[] tasks);
 
         Task GetStoredTaskById(string taskId);
+
+        List<Task> RequestAllGoogleTasks(TasksResource.ListRequest listRequest);
     }
 }
