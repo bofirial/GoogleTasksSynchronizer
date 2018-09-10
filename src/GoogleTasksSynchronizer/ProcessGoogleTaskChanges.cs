@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using Google.Apis.Services;
 using Google.Apis.Tasks.v1;
@@ -20,7 +21,7 @@ namespace GoogleTasksSynchronizer
     {
         [FunctionName("ProcessGoogleTaskChanges")]
         public static async System.Threading.Tasks.Task Run(
-            [TimerTrigger("*/15 * 6-23 * * *")]TimerInfo myTimer, 
+            [TimerTrigger("*/15 * 6-23 * * *", RunOnStartup = true)]TimerInfo myTimer, 
             [Blob("jschaferfunctions/googleTasksSynchronizerState.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob googleTasksSynchronizerState, 
             TraceWriter log)
         {
@@ -70,9 +71,13 @@ namespace GoogleTasksSynchronizer
                             clearedTasks.Add(task);
                         }
 
-                        if (null == storedTask && task.Hidden != true && task.Deleted != true)
+                        if (null == storedTask)
                         {
-                            createdTasks.Add(task);
+                            if (task.Hidden != true && task.Deleted != true)
+                            {
+                                createdTasks.Add(task);
+                            }
+
                             continue;
                         }
 
