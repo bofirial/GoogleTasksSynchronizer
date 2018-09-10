@@ -14,6 +14,6 @@ namespace GoogleTasksSynchronizer.Models
 
         internal UserCredential UserCredential { get; set; }
 
-        public IList<Task> GoogleTasks { get; set; }
+        public List<Task> GoogleTasks { get; set; }
     }
 }

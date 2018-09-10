@@ -34,11 +34,11 @@ namespace GoogleTasksSynchronizer
 
             TasksSynchronizerState tasksSynchronizerState = await tasksSynchronizerStateManager.SelectTasksSynchronizerStateAsync();
 
+            ITaskBusinessManager taskBusinessManager = new TaskBusinessManager(tasksSynchronizerState);
+
             IGoogleTaskAccountManager googleTaskAccountManager = new GoogleTaskAccountManager();
 
             List<TaskAccount> taskAccounts = googleTaskAccountManager.GetTaskAccounts(tasksSynchronizerState);
-
-            ITaskBusinessManager taskBusinessManager = new TaskBusinessManager(tasksSynchronizerState);
 
             List<Task> createdTasks = new List<Task>();
             List<Task> deletedTasks = new List<Task>();
@@ -52,16 +52,16 @@ namespace GoogleTasksSynchronizer
                 });
 
                 TasksResource.ListRequest listRequest = taskService.Tasks.List(taskAccount.TaskListId);
-
-                taskAccount.GoogleTasks = listRequest.Execute().Items;
                 
+                taskAccount.GoogleTasks = taskBusinessManager.RequestAllGoogleTasks(listRequest);
+
                 log.Info($"{taskAccount.GoogleTasks.Count} tasks for {taskAccount.AccountName}");
 
-                foreach (Task taskFromGoogle in taskAccount.GoogleTasks)
+                foreach (Task task in taskAccount.GoogleTasks)
                 {
-                    if (!tasksSynchronizerState.CurrentTasks.Any(c => taskBusinessManager.TasksAreLogicallyEqual(taskFromGoogle, c.Task)))
+                    if (!tasksSynchronizerState.CurrentTasks.Any(c => taskBusinessManager.TasksAreLogicallyEqual(task, c.Task)))
                     {
-                        createdTasks.Add(taskFromGoogle);
+                        createdTasks.Add(task);
                     }
                 }
 

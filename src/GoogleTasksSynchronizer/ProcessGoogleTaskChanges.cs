@@ -51,41 +51,47 @@ namespace GoogleTasksSynchronizer
 
                 TasksResource.ListRequest listRequest = taskService.Tasks.List(taskAccount.TaskListId);
 
-                listRequest.ShowCompleted = true;
-                listRequest.ShowDeleted = true;
-                listRequest.ShowHidden = true;
+                if (Environment.GetEnvironmentVariable("IgnoreInvisibleMode") == "true")
+                {
+                    listRequest.ShowCompleted = false;
+                    listRequest.ShowDeleted = false;
+                    listRequest.ShowHidden = false;
+                }
+                else
+                {
+                    listRequest.ShowCompleted = true;
+                    listRequest.ShowDeleted = true;
+                    listRequest.ShowHidden = true;
+                }
                 listRequest.UpdatedMin = DateTime.Today.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
 
-                taskAccount.GoogleTasks = listRequest.Execute().Items;
+                taskAccount.GoogleTasks = taskBusinessManager.RequestAllGoogleTasks(listRequest);
 
-                log.Info($"{taskAccount.GoogleTasks?.Count ?? 0} updated tasks today for {taskAccount.AccountName}");
+                log.Info($"{taskAccount.GoogleTasks.Count} updated tasks today for {taskAccount.AccountName}");
 
-                if (taskAccount.GoogleTasks != null)
+                foreach (Task task in taskAccount.GoogleTasks)
                 {
-                    foreach (Task task in taskAccount.GoogleTasks)
+                    Task storedTask = taskBusinessManager.GetStoredTaskById(task.Id);
+
+                    if (storedTask != null && taskBusinessManager.TasksMustBeCleared(task, storedTask))
                     {
-                        Task storedTask = taskBusinessManager.GetStoredTaskById(task.Id);
+                        clearedTasks.Add(task);
+                    }
 
-                        if (storedTask != null && taskBusinessManager.TasksMustBeCleared(task, storedTask))
+                    if (null == storedTask)
+                    {
+                        if (task.Hidden != true && task.Deleted != true)
                         {
-                            clearedTasks.Add(task);
+                            createdTasks.Add(task);
                         }
 
-                        if (null == storedTask)
-                        {
-                            if (task.Hidden != true && task.Deleted != true)
-                            {
-                                createdTasks.Add(task);
-                            }
+                        continue;
+                    }
 
-                            continue;
-                        }
-
-                        if (!taskBusinessManager.TasksAreLogicallyEqual(task, storedTask))
-                        {
-                            modifiedTasks.Add(task);
-                            continue;
-                        }
+                    if (!taskBusinessManager.TasksAreLogicallyEqual(task, storedTask))
+                    {
+                        modifiedTasks.Add(task);
+                        continue;
                     }
                 }
             }
@@ -104,7 +110,7 @@ namespace GoogleTasksSynchronizer
                         ApplicationName = "JSchafer Google Tasks Synchronizer",
                     });
 
-                    
+
                     Task[] tasks = taskAccount.GoogleTasks?.Where(t => taskBusinessManager.TasksAreLogicallyEqual(createdTask, t)).ToArray();
 
                     if (null == tasks || !tasks.Any())
@@ -119,7 +125,6 @@ namespace GoogleTasksSynchronizer
                             Status = createdTask.Status,
                             DueRaw = createdTask.DueRaw,
                             Deleted = createdTask.Deleted,
-                            Hidden = createdTask.Hidden,
                             Completed = createdTask.Completed,
                             CompletedRaw = createdTask.CompletedRaw,
                         };
@@ -178,7 +183,7 @@ namespace GoogleTasksSynchronizer
                         {
                             continue;
                         }
-                        
+
                         log.Info($"\tModifying Task \"{taskToModify.Title}\" for {taskAccount.AccountName}.");
 
                         taskToModify.Title = modifiedTask.Title;
