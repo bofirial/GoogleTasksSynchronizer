@@ -10,23 +10,23 @@ namespace GoogleTasksSynchronizer.Google
 {
     public class GoogleTaskAccountManager : IGoogleTaskAccountManager
     {
-        public List<TaskAccount> GetTaskAccounts(TasksSynchronizerState tasksSynchronizerState)
+        public async System.Threading.Tasks.Task<List<TaskAccount>> GetTaskAccountsAsync(TasksSynchronizerState tasksSynchronizerState)
         {
-            IGoogleClientSecretProvider googleClientSecretProvider = new GoogleClientSecretProvider();
+            var googleClientSecretProvider = new GoogleClientSecretProvider();
 
-            ClientSecrets clientSecrets = googleClientSecretProvider.GetGoogleClientSecrets();
+            var clientSecrets = googleClientSecretProvider.GetGoogleClientSecrets();
 
-            List<TaskAccount> taskAccounts =
+            var taskAccounts =
                 JsonConvert.DeserializeObject<List<TaskAccount>>(Environment.GetEnvironmentVariable("TaskAccounts"));
 
             foreach (var taskAccount in taskAccounts)
             {
-                taskAccount.UserCredential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+                taskAccount.UserCredential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                     clientSecrets,
                     new[] { TasksService.Scope.Tasks },
                     taskAccount.AccountName,
                     CancellationToken.None,
-                    new TaskSynchronizerStateGoogleDataStore(tasksSynchronizerState)).Result;
+                    new TaskSynchronizerStateGoogleDataStore(tasksSynchronizerState));
             }
 
             return taskAccounts;

@@ -10,23 +10,16 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 {
     public class TaskBusinessManager : ITaskBusinessManager
     {
-        private readonly TasksSynchronizerState _tasksSynchronizerState;
-
-        public TaskBusinessManager(TasksSynchronizerState tasksSynchronizerState)
-        {
-            _tasksSynchronizerState = tasksSynchronizerState;
-        }
-
         public bool TasksMustBeCleared(params Task[] tasks)
         {
-            Task firstTask = tasks.FirstOrDefault();
+            var firstTask = tasks.FirstOrDefault();
 
             return !tasks.All(t => t.Hidden == firstTask.Hidden);
         }
 
         public bool TasksAreLogicallyEqual(params Task[] tasks)
         {
-            Task firstTask = tasks.FirstOrDefault();
+            var firstTask = tasks.FirstOrDefault();
 
             return tasks.All(t => t?.Title == firstTask?.Title) &&
                    tasks.All(t => t?.Due == firstTask?.Due) &&
@@ -37,9 +30,9 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                    tasks.All(t => t?.Completed == firstTask?.Completed);
         }
 
-        public Task GetStoredTaskById(string taskId)
+        public Task GetStoredTaskById(string taskId, TasksSynchronizerState tasksSynchronizerState)
         {
-            foreach (CurrentTask currentTask in _tasksSynchronizerState.CurrentTasks)
+            foreach (var currentTask in tasksSynchronizerState.CurrentTasks)
             {
                 if (currentTask.TaskIds.Any(t => t.TaskId == taskId))
                 {
@@ -52,7 +45,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
         public List<Task> RequestAllGoogleTasks(TasksResource.ListRequest listRequest)
         {
-            List<Task> tasks = new List<Task>();
+            var tasks = new List<Task>();
 
             Tasks taskResult = null;
 

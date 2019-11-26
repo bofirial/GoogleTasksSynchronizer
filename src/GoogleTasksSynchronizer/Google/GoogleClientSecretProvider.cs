@@ -9,9 +9,9 @@ namespace GoogleTasksSynchronizer.Google
     {
         public ClientSecrets GetGoogleClientSecrets()
         {
-            string googleClientSecretJson = Environment.GetEnvironmentVariable("GoogleClientSecret");
+            var googleClientSecretJson = Environment.GetEnvironmentVariable("GoogleClientSecret");
 
-            Stream memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(googleClientSecretJson));
+            var memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(googleClientSecretJson));
 
             return GoogleClientSecrets.Load(memoryStream).Secrets;
         }

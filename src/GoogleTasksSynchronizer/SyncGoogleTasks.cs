@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 
@@ -25,39 +26,39 @@ namespace GoogleTasksSynchronizer
         [FunctionName("SyncGoogleTasks")]
         public static async System.Threading.Tasks.Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]HttpRequestMessage req,
-            [Blob("jschaferfunctions/googleTasksSynchronizerState.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob googleTasksSynchronizerState, 
-            TraceWriter log)
+            [Blob("jschaferfunctions/googleTasksSynchronizerState.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob googleTasksSynchronizerState,
+            ILogger log)
         {
-            log.Info($"SyncGoogleTasks Timer trigger function started at: {DateTime.Now}");
+            log.LogInformation($"SyncGoogleTasks Timer trigger function started at: {DateTime.Now}");
 
-            ITasksSynchronizerStateManager tasksSynchronizerStateManager = new TasksSynchronizerStateManager(googleTasksSynchronizerState, log);
+            var tasksSynchronizerStateManager = new TasksSynchronizerStateManager(googleTasksSynchronizerState, log);
 
-            TasksSynchronizerState tasksSynchronizerState = await tasksSynchronizerStateManager.SelectTasksSynchronizerStateAsync();
+            var tasksSynchronizerState = await tasksSynchronizerStateManager.SelectTasksSynchronizerStateAsync();
 
-            ITaskBusinessManager taskBusinessManager = new TaskBusinessManager(tasksSynchronizerState);
+            var taskBusinessManager = new TaskBusinessManager(tasksSynchronizerState);
 
-            IGoogleTaskAccountManager googleTaskAccountManager = new GoogleTaskAccountManager();
+            var googleTaskAccountManager = new GoogleTaskAccountManager();
 
-            List<TaskAccount> taskAccounts = googleTaskAccountManager.GetTaskAccounts(tasksSynchronizerState);
+            var taskAccounts = googleTaskAccountManager.GetTaskAccounts(tasksSynchronizerState);
 
-            List<Task> createdTasks = new List<Task>();
-            List<Task> deletedTasks = new List<Task>();
+            var createdTasks = new List<Task>();
+            var deletedTasks = new List<Task>();
 
             foreach (var taskAccount in taskAccounts)
             {
-                TasksService taskService = new TasksService(new BaseClientService.Initializer()
+                var taskService = new TasksService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = taskAccount.UserCredential,
                     ApplicationName = "JSchafer Google Tasks Synchronizer",
                 });
 
-                TasksResource.ListRequest listRequest = taskService.Tasks.List(taskAccount.TaskListId);
+                var listRequest = taskService.Tasks.List(taskAccount.TaskListId);
                 
                 taskAccount.GoogleTasks = taskBusinessManager.RequestAllGoogleTasks(listRequest);
 
-                log.Info($"{taskAccount.GoogleTasks.Count} tasks for {taskAccount.AccountName}");
+                log.LogInformation($"{taskAccount.GoogleTasks.Count} tasks for {taskAccount.AccountName}");
 
-                foreach (Task task in taskAccount.GoogleTasks)
+                foreach (var task in taskAccount.GoogleTasks)
                 {
                     if (!tasksSynchronizerState.CurrentTasks.Any(c => taskBusinessManager.TasksAreLogicallyEqual(task, c.Task)))
                     {
@@ -65,7 +66,7 @@ namespace GoogleTasksSynchronizer
                     }
                 }
 
-                foreach (CurrentTask currentTask in tasksSynchronizerState.CurrentTasks)
+                foreach (var currentTask in tasksSynchronizerState.CurrentTasks)
                 {
                     if (!taskAccount.GoogleTasks.Any(t => taskBusinessManager.TasksAreLogicallyEqual(currentTask.Task, t)))
                     {
@@ -74,27 +75,27 @@ namespace GoogleTasksSynchronizer
                 }
             }
 
-            log.Info($"{createdTasks.Count} tasks to create.");
+            log.LogInformation($"{createdTasks.Count} tasks to create.");
 
             foreach (var createdTask in createdTasks)
             {
-                List<TaskIdentifier> taskIdentifiers = new List<TaskIdentifier>();
+                var taskIdentifiers = new List<TaskIdentifier>();
 
-                foreach (TaskAccount taskAccount in taskAccounts)
+                foreach (var taskAccount in taskAccounts)
                 {
-                    Task[] tasks = taskAccount.GoogleTasks.Where(t => taskBusinessManager.TasksAreLogicallyEqual(createdTask, t)).ToArray();
+                    var tasks = taskAccount.GoogleTasks.Where(t => taskBusinessManager.TasksAreLogicallyEqual(createdTask, t)).ToArray();
 
                     if (!tasks.Any())
                     {
-                        log.Info($"\tNew Task \"{createdTask.Title}\" for {taskAccount.AccountName}.");
+                        log.LogInformation($"\tNew Task \"{createdTask.Title}\" for {taskAccount.AccountName}.");
 
-                        TasksService taskService = new TasksService(new BaseClientService.Initializer()
+                        var taskService = new TasksService(new BaseClientService.Initializer()
                         {
                             HttpClientInitializer = taskAccount.UserCredential,
                             ApplicationName = "JSchafer Google Tasks Synchronizer",
                         });
 
-                        Task newTask = new Task()
+                        var newTask = new Task()
                         {
                             Title = createdTask.Title,
                             Notes = createdTask.Notes,
@@ -106,9 +107,9 @@ namespace GoogleTasksSynchronizer
                             CompletedRaw = createdTask.CompletedRaw,
                         };
 
-                        TasksResource.InsertRequest insertRequest = taskService.Tasks.Insert(newTask, taskAccount.TaskListId);
+                        var insertRequest = taskService.Tasks.Insert(newTask, taskAccount.TaskListId);
 
-                        Task createdGoogleTask = insertRequest.Execute();
+                        var createdGoogleTask = insertRequest.Execute();
 
                         taskIdentifiers.Add(new TaskIdentifier() {AccountName = taskAccount.AccountName, TaskId = createdGoogleTask.Id});
                     }
@@ -125,28 +126,28 @@ namespace GoogleTasksSynchronizer
                 });
             }
 
-            log.Info($"{deletedTasks.Count} tasks to delete.");
+            log.LogInformation($"{deletedTasks.Count} tasks to delete.");
 
             foreach (var deletedTask in deletedTasks)
             {
                 tasksSynchronizerState.CurrentTasks.RemoveAll(c =>
                     taskBusinessManager.TasksAreLogicallyEqual(deletedTask, c.Task));
 
-                foreach (TaskAccount taskAccount in taskAccounts)
+                foreach (var taskAccount in taskAccounts)
                 {
-                    IEnumerable<Task> googleTasksToDelete = taskAccount.GoogleTasks.Where(t => taskBusinessManager.TasksAreLogicallyEqual(deletedTask, t));
+                    var googleTasksToDelete = taskAccount.GoogleTasks.Where(t => taskBusinessManager.TasksAreLogicallyEqual(deletedTask, t));
 
-                    foreach (Task taskToDelete in googleTasksToDelete)
+                    foreach (var taskToDelete in googleTasksToDelete)
                     {
-                        log.Info($"\tDeleting Task \"{taskToDelete.Title}\" for {taskAccount.AccountName}.");
+                        log.LogInformation($"\tDeleting Task \"{taskToDelete.Title}\" for {taskAccount.AccountName}.");
 
-                        TasksService taskService = new TasksService(new BaseClientService.Initializer()
+                        var taskService = new TasksService(new BaseClientService.Initializer()
                         {
                             HttpClientInitializer = taskAccount.UserCredential,
                             ApplicationName = "JSchafer Google Tasks Synchronizer",
                         });
 
-                        TasksResource.DeleteRequest deleteRequest = taskService.Tasks.Delete(taskAccount.TaskListId, taskToDelete.Id);
+                        var deleteRequest = taskService.Tasks.Delete(taskAccount.TaskListId, taskToDelete.Id);
 
                         deleteRequest.Execute();
                     }
@@ -155,7 +156,7 @@ namespace GoogleTasksSynchronizer
 
             await tasksSynchronizerStateManager.UpdateTasksSynchronizerStateAsync(tasksSynchronizerState);
 
-            log.Info($"SyncGoogleTasks Timer trigger function completed at: {DateTime.Now}");
+            log.LogInformation($"SyncGoogleTasks Timer trigger function completed at: {DateTime.Now}");
 
             return req.CreateResponse(HttpStatusCode.OK);
         }

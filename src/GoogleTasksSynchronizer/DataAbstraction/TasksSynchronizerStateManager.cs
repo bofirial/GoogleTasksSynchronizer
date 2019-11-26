@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using GoogleTasksSynchronizer.Models;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 
@@ -9,18 +10,16 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 {
     public class TasksSynchronizerStateManager : ITasksSynchronizerStateManager
     {
-        private readonly CloudBlockBlob _tasksSynchronizerStateBlob;
-        private readonly TraceWriter _log;
+        private readonly ILogger _log;
 
-        public TasksSynchronizerStateManager(CloudBlockBlob tasksSynchronizerStateBlob, TraceWriter log)
+        public TasksSynchronizerStateManager(ILogger log)
         {
-            _tasksSynchronizerStateBlob = tasksSynchronizerStateBlob;
             _log = log;
         }
 
-        public async Task<TasksSynchronizerState> SelectTasksSynchronizerStateAsync()
+        public async Task<TasksSynchronizerState> SelectTasksSynchronizerStateAsync(CloudBlockBlob tasksSynchronizerStateBlob)
         {
-            string rawData = await _tasksSynchronizerStateBlob.DownloadTextAsync();
+            var rawData = await tasksSynchronizerStateBlob.DownloadTextAsync();
 
             try
             {
@@ -28,17 +27,17 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             }
             catch (Exception e)
             {
-                _log.Warning($"Failed to Deserialize the TasksSynchronizerState: {rawData}.  Exception Details: {e.Message}");
+                _log.LogWarning($"Failed to Deserialize the TasksSynchronizerState: {rawData}.  Exception Details: {e.Message}");
 
                 return new TasksSynchronizerState();
             }
         }
 
-        public Task UpdateTasksSynchronizerStateAsync(TasksSynchronizerState tasksSynchronizerState)
+        public Task UpdateTasksSynchronizerStateAsync(TasksSynchronizerState tasksSynchronizerState, CloudBlockBlob tasksSynchronizerStateBlob)
         {
-            string serializedTasksSynchronizerState = JsonConvert.SerializeObject(tasksSynchronizerState);
+            var serializedTasksSynchronizerState = JsonConvert.SerializeObject(tasksSynchronizerState);
 
-            return _tasksSynchronizerStateBlob.UploadTextAsync(serializedTasksSynchronizerState);
+            return tasksSynchronizerStateBlob.UploadTextAsync(serializedTasksSynchronizerState);
         }
     }
 }

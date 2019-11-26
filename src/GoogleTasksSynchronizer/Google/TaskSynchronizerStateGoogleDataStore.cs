@@ -38,7 +38,7 @@ namespace GoogleTasksSynchronizer.Google
                 return Task.FromResult(default(T));
             }
 
-            string googleUserCredential = _tasksSynchronizerState.GoogleUserCredentials[key];
+            var googleUserCredential = _tasksSynchronizerState.GoogleUserCredentials[key];
             
             return Task.FromResult(JsonConvert.DeserializeObject<T>(googleUserCredential));
         }

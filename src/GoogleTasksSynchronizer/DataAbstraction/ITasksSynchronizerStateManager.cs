@@ -1,4 +1,5 @@
 ﻿using GoogleTasksSynchronizer.Models;
+using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,8 +9,8 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 {
     public interface ITasksSynchronizerStateManager
     {
-        Task<TasksSynchronizerState> SelectTasksSynchronizerStateAsync();
+        Task<TasksSynchronizerState> SelectTasksSynchronizerStateAsync(CloudBlockBlob cloudBlockBlob);
 
-        Task UpdateTasksSynchronizerStateAsync(TasksSynchronizerState tasksSynchronizerState);
+        Task UpdateTasksSynchronizerStateAsync(TasksSynchronizerState tasksSynchronizerState, CloudBlockBlob tasksSynchronizerStateBlob);
     }
 }
