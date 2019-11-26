@@ -1,24 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Tasks.v1;
+using GoogleTasksSynchronizer.Configuration;
 using GoogleTasksSynchronizer.Models;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace GoogleTasksSynchronizer.Google
 {
     public class GoogleTaskAccountManager : IGoogleTaskAccountManager
     {
-        private readonly IOptions<TaskAccountsOptions> _taskAccountsOptions;
+        private readonly IOptions<SynchronizationTargetsOptions> _taskAccountsOptions;
 
-        public GoogleTaskAccountManager(IOptions<TaskAccountsOptions> taskAccountsOptions)
+        public GoogleTaskAccountManager(IOptions<SynchronizationTargetsOptions> taskAccountsOptions)
         {
             _taskAccountsOptions = taskAccountsOptions;
         }
 
-        public async System.Threading.Tasks.Task<List<TaskAccount>> GetTaskAccountsAsync(TasksSynchronizerState tasksSynchronizerState)
+        public async Task<List<TaskAccountState>> GetTaskAccountsAsync(TasksSynchronizerState tasksSynchronizerState)
         {
             var googleClientSecretProvider = new GoogleClientSecretProvider();
 
@@ -26,19 +27,20 @@ namespace GoogleTasksSynchronizer.Google
 
             //var taskAccounts =
             //    JsonConvert.DeserializeObject<List<TaskAccount>>(Environment.GetEnvironmentVariable("TaskAccounts"));
-            var taskAccounts = _taskAccountsOptions.Value.TaskAccounts;
 
-            foreach (var taskAccount in taskAccounts)
-            {
-                taskAccount.UserCredential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    clientSecrets,
-                    new[] { TasksService.Scope.Tasks },
-                    taskAccount.AccountName,
-                    CancellationToken.None,
-                    new TaskSynchronizerStateGoogleDataStore(tasksSynchronizerState));
-            }
+            var taskAccountStateTasks = _taskAccountsOptions.Value.SynchronizationTargets.Select(async st =>
+               new TaskAccountState()
+               {
+                   SynchronizationTarget = st,
+                   UserCredential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                       clientSecrets,
+                       new[] { TasksService.Scope.Tasks },
+                       st.GoogleAccountName,
+                       CancellationToken.None,
+                       new TaskSynchronizerStateGoogleDataStore(tasksSynchronizerState))
+               });
 
-            return taskAccounts;
+            return (await Task.WhenAll(taskAccountStateTasks)).ToList();
         }
     }
 }
