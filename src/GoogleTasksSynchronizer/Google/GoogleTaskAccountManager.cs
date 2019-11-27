@@ -19,7 +19,7 @@ namespace GoogleTasksSynchronizer.Google
             _taskAccountsOptions = taskAccountsOptions;
         }
 
-        public async Task<List<TaskAccountState>> GetTaskAccountsAsync(TasksSynchronizerState tasksSynchronizerState)
+        public async Task<List<TaskAccount>> GetTaskAccountsAsync(TasksSynchronizerState tasksSynchronizerState)
         {
             var googleClientSecretProvider = new GoogleClientSecretProvider();
 
@@ -29,7 +29,7 @@ namespace GoogleTasksSynchronizer.Google
             //    JsonConvert.DeserializeObject<List<TaskAccount>>(Environment.GetEnvironmentVariable("TaskAccounts"));
 
             var taskAccountStateTasks = _taskAccountsOptions.Value.SynchronizationTargets.Select(async st =>
-               new TaskAccountState()
+               new TaskAccount()
                {
                    SynchronizationTarget = st,
                    UserCredential = await GoogleWebAuthorizationBroker.AuthorizeAsync(

@@ -7,6 +7,6 @@ namespace GoogleTasksSynchronizer.Google
 {
     public interface IGoogleTaskAccountManager
     {
-        Task<List<TaskAccountState>> GetTaskAccountsAsync(TasksSynchronizerState tasksSynchronizerState);
+        Task<List<TaskAccount>> GetTaskAccountsAsync(TasksSynchronizerState tasksSynchronizerState);
     }
 }

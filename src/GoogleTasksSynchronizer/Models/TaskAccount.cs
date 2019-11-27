@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace GoogleTasksSynchronizer.Models
 {
-    public class TaskAccountState
+    public class TaskAccount
     {
         public SynchronizationTarget SynchronizationTarget { get; set; }
 

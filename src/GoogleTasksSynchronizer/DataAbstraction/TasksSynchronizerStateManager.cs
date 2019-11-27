@@ -10,11 +10,11 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 {
     public class TasksSynchronizerStateManager : ITasksSynchronizerStateManager
     {
-        private readonly ILogger _log;
+        private readonly ILogger _logger;
 
-        public TasksSynchronizerStateManager(ILogger log)
+        public TasksSynchronizerStateManager(ILogger logger)
         {
-            _log = log;
+            _logger = logger;
         }
 
         public async Task<TasksSynchronizerState> SelectTasksSynchronizerStateAsync(CloudBlockBlob tasksSynchronizerStateBlob)
@@ -27,7 +27,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             }
             catch (Exception e)
             {
-                _log.LogWarning($"Failed to Deserialize the TasksSynchronizerState: {rawData}.  Exception Details: {e.Message}");
+                _logger.LogWarning($"Failed to Deserialize the TasksSynchronizerState: {rawData}.  Exception Details: {e.Message}");
 
                 return new TasksSynchronizerState();
             }
@@ -35,6 +35,9 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
         public Task UpdateTasksSynchronizerStateAsync(TasksSynchronizerState tasksSynchronizerState, CloudBlockBlob tasksSynchronizerStateBlob)
         {
+            tasksSynchronizerState.CurrentTasks.RemoveAll(c =>
+                c.Task.Updated < DateTime.Today.AddDays(-7) && (c.Task.Hidden == true || c.Task.Deleted == true));
+
             var serializedTasksSynchronizerState = JsonConvert.SerializeObject(tasksSynchronizerState);
 
             return tasksSynchronizerStateBlob.UploadTextAsync(serializedTasksSynchronizerState);
