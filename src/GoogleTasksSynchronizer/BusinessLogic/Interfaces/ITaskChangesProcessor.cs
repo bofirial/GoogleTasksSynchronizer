@@ -5,6 +5,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 {
     public interface ITaskChangesProcessor
     {
-        Task ProcessTaskChangesAsync(TasksSynchronizerState tasksSynchronizerState);
+        Task ProcessTaskChangesAsync();
     }
 }

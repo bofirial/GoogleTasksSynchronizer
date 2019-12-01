@@ -15,9 +15,13 @@ namespace GoogleTasksSynchronizer
         {
             builder.Services.AddLogging();
 
-            builder.Services.AddScoped<ITasksSynchronizerStateManager, TasksSynchronizerStateManager>();
-            builder.Services.AddScoped<ITaskBusinessManager, TaskBusinessManager>();
-            builder.Services.AddScoped<IGoogleTaskAccountManager, GoogleTaskAccountManager>();
+            builder.Services.AddSingleton<IApplicationStateManager, ApplicationStateManager>();
+
+            builder.Services.AddScoped<ITaskChangesProcessor, TaskChangesProcessor>();
+
+            //builder.Services.AddScoped<ITasksSynchronizerStateManager, TasksSynchronizerStateManager>();
+            //builder.Services.AddScoped<ITaskBusinessManager, TaskBusinessManager>();
+            //builder.Services.AddScoped<IGoogleTaskAccountManager, GoogleTaskAccountManager>();
         }
     }
 }

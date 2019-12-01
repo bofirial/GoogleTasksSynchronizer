@@ -6,7 +6,7 @@ using GoogleTasksSynchronizer.Models;
 
 namespace GoogleTasksSynchronizer.BusinessLogic
 {
-    public interface ITaskBusinessManager
+    public interface IOldTaskBusinessManager
     {
         bool TasksMustBeCleared(params Task[] tasks);
 

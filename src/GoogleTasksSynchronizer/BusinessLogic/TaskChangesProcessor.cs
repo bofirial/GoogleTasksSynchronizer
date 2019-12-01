@@ -14,181 +14,189 @@ namespace GoogleTasksSynchronizer.BusinessLogic
     public class TaskChangesProcessor : ITaskChangesProcessor
     {
         private readonly ILogger _logger;
-        private readonly IGoogleTaskAccountManager _googleTaskAccountManager;
-        private readonly ITaskChangeCalculator _taskChangeCalculator;
-        private readonly ITaskBusinessManager _taskBusinessManager;
+        private readonly IMasterTaskGroupBusinessManager _masterTaskGroupBusinessManager;
+
+        //private readonly IGoogleTaskAccountManager _googleTaskAccountManager;
+        //private readonly ITaskChangeCalculator _taskChangeCalculator;
+        //private readonly ITaskBusinessManager _taskBusinessManager;
 
         public TaskChangesProcessor(
             ILogger logger,
-            IGoogleTaskAccountManager googleTaskAccountManager,
-            ITaskChangeCalculator taskChangeCalculator,
-            ITaskBusinessManager taskBusinessManager)
+            IMasterTaskGroupBusinessManager masterTaskGroupBusinessManager
+            //IGoogleTaskAccountManager googleTaskAccountManager,
+            //ITaskChangeCalculator taskChangeCalculator,
+            //ITaskBusinessManager taskBusinessManager
+            )
         {
             _logger = logger;
-            _googleTaskAccountManager = googleTaskAccountManager;
-            _taskChangeCalculator = taskChangeCalculator;
-            _taskBusinessManager = taskBusinessManager;
+            _masterTaskGroupBusinessManager = masterTaskGroupBusinessManager;
+            //_googleTaskAccountManager = googleTaskAccountManager;
+            //_taskChangeCalculator = taskChangeCalculator;
+            //_taskBusinessManager = taskBusinessManager;
         }
 
-        public async Task ProcessTaskChangesAsync(TasksSynchronizerState tasksSynchronizerState)
+        public async Task ProcessTaskChangesAsync()
         {
-            var taskAccounts = await _googleTaskAccountManager.GetTaskAccountsAsync(tasksSynchronizerState);
+            var masterTaskGroups = await _masterTaskGroupBusinessManager.SelectAsync();
 
-            var taskChanges = new TaskChanges()
+            foreach (var masterTaskGroup in masterTaskGroups)
             {
-                TasksToCreate = new List<Google::Task>(),
-                TasksToModify = new List<Google::Task>(),
-                TasksToClear = new List<Google::Task>()
-            };
+                //var taskChanges = new TaskChanges()
+                //{
+                //    TasksToCreate = new List<Google::Task>(),
+                //    TasksToModify = new List<Google::Task>(),
+                //    TasksToClear = new List<Google::Task>()
+                //};
 
-            foreach (var taskAccount in taskAccounts)
-            {
-                _taskChangeCalculator.CalculateTaskChanges(taskAccount, tasksSynchronizerState, taskChanges);
-            }
+                //foreach (var taskAccount in taskAccounts)
+                //{
+                //    _taskChangeCalculator.CalculateTaskChanges(taskAccount, tasksSynchronizerState, taskChanges);
+                //}
 
-            ProcessTasksToCreate(tasksSynchronizerState, taskAccounts, taskChanges.TasksToCreate);
+                //ProcessTasksToCreate(tasksSynchronizerState, taskAccounts, taskChanges.TasksToCreate);
 
-            ProcessTasksToModify(tasksSynchronizerState, taskAccounts, taskChanges.TasksToModify);
+                //ProcessTasksToModify(tasksSynchronizerState, taskAccounts, taskChanges.TasksToModify);
 
-            ProcessTasksToClear(tasksSynchronizerState, taskAccounts, taskChanges.TasksToClear);
-        }
-
-        private void ProcessTasksToClear(TasksSynchronizerState tasksSynchronizerState, List<TaskAccount> taskAccounts, List<Google::Task> tasksToClear)
-        {
-            if (tasksToClear.Any())
-            {
-                _logger.LogInformation("Tasks must be cleared.");
-
-                foreach (var taskAccount in taskAccounts)
-                {
-                    _logger.LogInformation($"\tClearing Tasks for {taskAccount.SynchronizationTarget.GoogleAccountName}.");
-                    var taskService = new TasksService(new BaseClientService.Initializer()
-                    {
-                        HttpClientInitializer = taskAccount.UserCredential,
-                        ApplicationName = "JSchafer Google Tasks Synchronizer",
-                    });
-
-                    taskService.Tasks.Clear(taskAccount.SynchronizationTarget.TaskListId).Execute();
-                }
-
-                foreach (var clearedTask in tasksToClear)
-                {
-                    var storedTask = _taskBusinessManager.GetStoredTaskById(clearedTask.Id, tasksSynchronizerState);
-
-                    storedTask.Hidden = clearedTask.Hidden;
-                }
+                //ProcessTasksToClear(tasksSynchronizerState, taskAccounts, taskChanges.TasksToClear);
             }
         }
 
-        private void ProcessTasksToModify(TasksSynchronizerState tasksSynchronizerState, List<TaskAccount> taskAccounts, List<Google::Task> tasksToModify)
-        {
-            _logger.LogInformation($"{tasksToModify.Count} tasks to modify.");
+        //private void ProcessTasksToClear(TasksSynchronizerState tasksSynchronizerState, List<TaskAccount> taskAccounts, List<Google::Task> tasksToClear)
+        //{
+        //    if (tasksToClear.Any())
+        //    {
+        //        _logger.LogInformation("Tasks must be cleared.");
 
-            foreach (var modifiedTask in tasksToModify)
-            {
-                var currentTasks = tasksSynchronizerState.CurrentTasks.Where(c => c.TaskIds.Any(t => modifiedTask.Id == t.TaskId)).ToList();
+        //        foreach (var taskAccount in taskAccounts)
+        //        {
+        //            _logger.LogInformation($"\tClearing Tasks for {taskAccount.SynchronizationTarget.GoogleAccountName}.");
+        //            var taskService = new TasksService(new BaseClientService.Initializer()
+        //            {
+        //                HttpClientInitializer = taskAccount.UserCredential,
+        //                ApplicationName = "JSchafer Google Tasks Synchronizer",
+        //            });
 
-                foreach (var currentTask in currentTasks)
-                {
-                    currentTask.Task = modifiedTask;
-                }
+        //            taskService.Tasks.Clear(taskAccount.SynchronizationTarget.TaskListId).Execute();
+        //        }
 
-                foreach (var taskAccount in taskAccounts)
-                {
-                    var taskService = new TasksService(new BaseClientService.Initializer()
-                    {
-                        HttpClientInitializer = taskAccount.UserCredential,
-                        ApplicationName = "JSchafer Google Tasks Synchronizer",
-                    });
+        //        foreach (var clearedTask in tasksToClear)
+        //        {
+        //            var storedTask = _taskBusinessManager.GetStoredTaskById(clearedTask.Id, tasksSynchronizerState);
 
-                    var taskIdsToModify = currentTasks.SelectMany(c => c.TaskIds).Where(c => c.AccountName == taskAccount.SynchronizationTarget.GoogleAccountName).Select(t => t.TaskId).ToList();
+        //            storedTask.Hidden = clearedTask.Hidden;
+        //        }
+        //    }
+        //}
 
-                    foreach (var taskId in taskIdsToModify)
-                    {
+        //private void ProcessTasksToModify(TasksSynchronizerState tasksSynchronizerState, List<TaskAccount> taskAccounts, List<Google::Task> tasksToModify)
+        //{
+        //    _logger.LogInformation($"{tasksToModify.Count} tasks to modify.");
 
-                        var taskToModify = taskAccount.GoogleTasks?.FirstOrDefault(t => t.Id == taskId);
+        //    foreach (var modifiedTask in tasksToModify)
+        //    {
+        //        var currentTasks = tasksSynchronizerState.CurrentTasks.Where(c => c.TaskIds.Any(t => modifiedTask.Id == t.TaskId)).ToList();
 
-                        if (null == taskToModify)
-                        {
-                            taskToModify = taskService.Tasks.Get(taskAccount.SynchronizationTarget.TaskListId, taskId).Execute();
-                        }
+        //        foreach (var currentTask in currentTasks)
+        //        {
+        //            currentTask.Task = modifiedTask;
+        //        }
 
-                        if (_taskBusinessManager.TasksAreLogicallyEqual(taskToModify, modifiedTask))
-                        {
-                            continue;
-                        }
+        //        foreach (var taskAccount in taskAccounts)
+        //        {
+        //            var taskService = new TasksService(new BaseClientService.Initializer()
+        //            {
+        //                HttpClientInitializer = taskAccount.UserCredential,
+        //                ApplicationName = "JSchafer Google Tasks Synchronizer",
+        //            });
 
-                        _logger.LogInformation($"\tModifying Task \"{taskToModify.Title}\" for {taskAccount.SynchronizationTarget.GoogleAccountName}.");
+        //            var taskIdsToModify = currentTasks.SelectMany(c => c.TaskIds).Where(c => c.AccountName == taskAccount.SynchronizationTarget.GoogleAccountName).Select(t => t.TaskId).ToList();
 
-                        taskToModify.Title = modifiedTask.Title;
-                        taskToModify.Notes = modifiedTask.Notes;
-                        taskToModify.Due = modifiedTask.Due;
-                        taskToModify.Status = modifiedTask.Status;
-                        taskToModify.DueRaw = modifiedTask.DueRaw;
-                        taskToModify.Deleted = modifiedTask.Deleted;
-                        taskToModify.Completed = modifiedTask.Completed;
-                        taskToModify.CompletedRaw = modifiedTask.CompletedRaw;
+        //            foreach (var taskId in taskIdsToModify)
+        //            {
 
-                        var updateRequest = taskService.Tasks.Update(taskToModify, taskAccount.SynchronizationTarget.TaskListId, taskToModify.Id);
+        //                var taskToModify = taskAccount.GoogleTasks?.FirstOrDefault(t => t.Id == taskId);
 
-                        updateRequest.Execute();
-                    }
-                }
-            }
-        }
+        //                if (null == taskToModify)
+        //                {
+        //                    taskToModify = taskService.Tasks.Get(taskAccount.SynchronizationTarget.TaskListId, taskId).Execute();
+        //                }
 
-        private void ProcessTasksToCreate(TasksSynchronizerState tasksSynchronizerState, List<TaskAccount> taskAccounts, List<Google::Task> tasksToCreate)
-        {
-            _logger.LogInformation($"{tasksToCreate.Count} tasks to create.");
+        //                if (_taskBusinessManager.TasksAreLogicallyEqual(taskToModify, modifiedTask))
+        //                {
+        //                    continue;
+        //                }
 
-            foreach (var createdTask in tasksToCreate)
-            {
-                var taskIdentifiers = new List<TaskIdentifier>();
+        //                _logger.LogInformation($"\tModifying Task \"{taskToModify.Title}\" for {taskAccount.SynchronizationTarget.GoogleAccountName}.");
 
-                foreach (var taskAccount in taskAccounts)
-                {
-                    var taskService = new TasksService(new BaseClientService.Initializer()
-                    {
-                        HttpClientInitializer = taskAccount.UserCredential,
-                        ApplicationName = "JSchafer Google Tasks Synchronizer",
-                    });
+        //                taskToModify.Title = modifiedTask.Title;
+        //                taskToModify.Notes = modifiedTask.Notes;
+        //                taskToModify.Due = modifiedTask.Due;
+        //                taskToModify.Status = modifiedTask.Status;
+        //                taskToModify.DueRaw = modifiedTask.DueRaw;
+        //                taskToModify.Deleted = modifiedTask.Deleted;
+        //                taskToModify.Completed = modifiedTask.Completed;
+        //                taskToModify.CompletedRaw = modifiedTask.CompletedRaw;
 
-                    var tasks = taskAccount.GoogleTasks?.Where(t => _taskBusinessManager.TasksAreLogicallyEqual(createdTask, t)).ToArray();
+        //                var updateRequest = taskService.Tasks.Update(taskToModify, taskAccount.SynchronizationTarget.TaskListId, taskToModify.Id);
 
-                    if (null == tasks || !tasks.Any())
-                    {
-                        _logger.LogInformation($"\tNew Task \"{createdTask.Title}\" for {taskAccount.SynchronizationTarget.GoogleAccountName}.");
+        //                updateRequest.Execute();
+        //            }
+        //        }
+        //    }
+        //}
 
-                        var newTask = new Google::Task()
-                        {
-                            Title = createdTask.Title,
-                            Notes = createdTask.Notes,
-                            Due = createdTask.Due,
-                            Status = createdTask.Status,
-                            DueRaw = createdTask.DueRaw,
-                            Deleted = createdTask.Deleted,
-                            Completed = createdTask.Completed,
-                            CompletedRaw = createdTask.CompletedRaw,
-                        };
+        //private void ProcessTasksToCreate(TasksSynchronizerState tasksSynchronizerState, List<TaskAccount> taskAccounts, List<Google::Task> tasksToCreate)
+        //{
+        //    _logger.LogInformation($"{tasksToCreate.Count} tasks to create.");
 
-                        var insertRequest = taskService.Tasks.Insert(newTask, taskAccount.SynchronizationTarget.TaskListId);
+        //    foreach (var createdTask in tasksToCreate)
+        //    {
+        //        var taskIdentifiers = new List<TaskIdentifier>();
 
-                        var createdGoogleTask = insertRequest.Execute();
+        //        foreach (var taskAccount in taskAccounts)
+        //        {
+        //            var taskService = new TasksService(new BaseClientService.Initializer()
+        //            {
+        //                HttpClientInitializer = taskAccount.UserCredential,
+        //                ApplicationName = "JSchafer Google Tasks Synchronizer",
+        //            });
 
-                        taskIdentifiers.Add(new TaskIdentifier() { AccountName = taskAccount.SynchronizationTarget.GoogleAccountName, TaskId = createdGoogleTask.Id });
-                    }
-                    else
-                    {
-                        taskIdentifiers.AddRange(tasks.Select(t => new TaskIdentifier() { AccountName = taskAccount.SynchronizationTarget.GoogleAccountName, TaskId = t.Id }));
-                    }
-                }
+        //            var tasks = taskAccount.GoogleTasks?.Where(t => _taskBusinessManager.TasksAreLogicallyEqual(createdTask, t)).ToArray();
 
-                tasksSynchronizerState.CurrentTasks.Add(new CurrentTask()
-                {
-                    Task = createdTask,
-                    TaskIds = taskIdentifiers
-                });
-            }
-        }
+        //            if (null == tasks || !tasks.Any())
+        //            {
+        //                _logger.LogInformation($"\tNew Task \"{createdTask.Title}\" for {taskAccount.SynchronizationTarget.GoogleAccountName}.");
+
+        //                var newTask = new Google::Task()
+        //                {
+        //                    Title = createdTask.Title,
+        //                    Notes = createdTask.Notes,
+        //                    Due = createdTask.Due,
+        //                    Status = createdTask.Status,
+        //                    DueRaw = createdTask.DueRaw,
+        //                    Deleted = createdTask.Deleted,
+        //                    Completed = createdTask.Completed,
+        //                    CompletedRaw = createdTask.CompletedRaw,
+        //                };
+
+        //                var insertRequest = taskService.Tasks.Insert(newTask, taskAccount.SynchronizationTarget.TaskListId);
+
+        //                var createdGoogleTask = insertRequest.Execute();
+
+        //                taskIdentifiers.Add(new TaskIdentifier() { AccountName = taskAccount.SynchronizationTarget.GoogleAccountName, TaskId = createdGoogleTask.Id });
+        //            }
+        //            else
+        //            {
+        //                taskIdentifiers.AddRange(tasks.Select(t => new TaskIdentifier() { AccountName = taskAccount.SynchronizationTarget.GoogleAccountName, TaskId = t.Id }));
+        //            }
+        //        }
+
+        //        tasksSynchronizerState.CurrentTasks.Add(new CurrentTask()
+        //        {
+        //            Task = createdTask,
+        //            TaskIds = taskIdentifiers
+        //        });
+        //    }
+        //}
     }
 }

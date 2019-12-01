@@ -11,16 +11,16 @@ namespace GoogleTasksSynchronizer
     public class ProcessGoogleTaskChanges
     {
         private readonly ILogger _logger;
-        private readonly ITasksSynchronizerStateManager _tasksSynchronizerStateManager;
+        private readonly IApplicationStateManager _applicationStateManager;
         private readonly ITaskChangesProcessor _taskChangesProcessor;
 
         public ProcessGoogleTaskChanges(
             ILogger logger, 
-            ITasksSynchronizerStateManager tasksSynchronizerStateManager,
+            IApplicationStateManager applicationStateManager,
             ITaskChangesProcessor taskChangesProcessor)
         {
             _logger = logger;
-            _tasksSynchronizerStateManager = tasksSynchronizerStateManager;
+            _applicationStateManager = applicationStateManager;
             _taskChangesProcessor = taskChangesProcessor;
         }
 
@@ -29,13 +29,11 @@ namespace GoogleTasksSynchronizer
             [TimerTrigger("*/15 * 6-23 * * *", RunOnStartup = true)]TimerInfo myTimer, 
             [Blob("jschaferfunctions/googleTasksSynchronizerState.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob tasksSynchronizerStateBlob)
         {
-            _logger.LogInformation($"ProcessGoogleTaskChanges Timer trigger function started at: {DateTime.Now}");
+            _logger.LogInformation($"ProcessGoogleTaskChanges Timer trigger function started at: {DateTime.Now}.  It {(myTimer.IsPastDue ? "was" : "was not")} past due.");
 
-            var tasksSynchronizerState = await _tasksSynchronizerStateManager.SelectTasksSynchronizerStateAsync(tasksSynchronizerStateBlob);
+            await _applicationStateManager.InitializeFromBindingAsync(tasksSynchronizerStateBlob);
 
-            await _taskChangesProcessor.ProcessTaskChangesAsync(tasksSynchronizerState);
-
-            await _tasksSynchronizerStateManager.UpdateTasksSynchronizerStateAsync(tasksSynchronizerState, tasksSynchronizerStateBlob);
+            await _taskChangesProcessor.ProcessTaskChangesAsync();
 
             _logger.LogInformation($"ProcessGoogleTaskChanges Timer trigger function completed at: {DateTime.Now}");
         }
