@@ -1,7 +1,8 @@
-﻿
-using GoogleTasksSynchronizer.BusinessLogic;
+﻿using GoogleTasksSynchronizer.BusinessLogic;
+using GoogleTasksSynchronizer.BusinessLogic.Data;
+using GoogleTasksSynchronizer.Configuration;
 using GoogleTasksSynchronizer.DataAbstraction;
-using GoogleTasksSynchronizer.Google;
+using GoogleTasksSynchronizer.DataAbstraction.Google;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,6 +20,19 @@ namespace GoogleTasksSynchronizer
 
             builder.Services.AddScoped<ITaskChangesProcessor, TaskChangesProcessor>();
 
+            builder.Services.AddScoped<IMasterTaskGroupBusinessManager, MasterTaskGroupBusinessManager>();
+
+            builder.Services.AddOptions<SynchronizationTargetsOptions>();
+            builder.Services.AddScoped<IMasterTaskBusinessManager, MasterTaskBusinessManager>();
+            builder.Services.AddScoped<IMasterTaskManager, MasterTaskManager>();
+
+            builder.Services.AddScoped<ITaskBusinessManager, TaskBusinessManager>();
+            builder.Services.AddScoped<ITaskManager, TaskManager>();
+            builder.Services.AddScoped<ITaskServiceFactory, TaskServiceFactory>();
+
+            builder.Services.AddScoped<IGoogleClientSecretProvider, GoogleClientSecretProvider>();
+            builder.Services.AddScoped<IGoogleUserCredentialsManager, GoogleUserCredentialsManager>();
+            
             //builder.Services.AddScoped<ITasksSynchronizerStateManager, TasksSynchronizerStateManager>();
             //builder.Services.AddScoped<ITaskBusinessManager, TaskBusinessManager>();
             //builder.Services.AddScoped<IGoogleTaskAccountManager, GoogleTaskAccountManager>();

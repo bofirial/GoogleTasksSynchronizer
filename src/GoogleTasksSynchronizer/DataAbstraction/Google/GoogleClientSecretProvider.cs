@@ -3,12 +3,13 @@ using System.IO;
 using System.Text;
 using Google.Apis.Auth.OAuth2;
 
-namespace GoogleTasksSynchronizer.Google
+namespace GoogleTasksSynchronizer.DataAbstraction.Google
 {
     public class GoogleClientSecretProvider : IGoogleClientSecretProvider
     {
         public ClientSecrets GetGoogleClientSecrets()
         {
+            //TODO: Consider switching this to use Configuration
             var googleClientSecretJson = Environment.GetEnvironmentVariable("GoogleClientSecret");
 
             var memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(googleClientSecretJson));

@@ -8,7 +8,7 @@ using GoogleTasksSynchronizer.Models;
 
 namespace GoogleTasksSynchronizer.BusinessLogic
 {
-    public class TaskBusinessManager : IOldTaskBusinessManager
+    public class OldTaskBusinessManager : IOldTaskBusinessManager
     {
         public bool TasksMustBeCleared(params Task[] tasks)
         {

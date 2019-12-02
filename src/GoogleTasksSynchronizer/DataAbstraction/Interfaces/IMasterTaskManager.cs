@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GoogleTasksSynchronizer.DataAbstraction.Interfaces
+namespace GoogleTasksSynchronizer.DataAbstraction
 {
     public interface IMasterTaskManager
     {

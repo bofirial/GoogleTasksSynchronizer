@@ -1,15 +1,8 @@
-﻿using GoogleTasksSynchronizer.DataAbstraction.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Google.Apis.Util.Store;
 
-namespace GoogleTasksSynchronizer.DataAbstraction.Interfaces
+namespace GoogleTasksSynchronizer.DataAbstraction
 {
-    public interface IGoogleUserCredentialsManager
+    public interface IGoogleUserCredentialsManager : IDataStore
     {
-        Task<GoogleUserCredentials> SelectAsync();
-
-        Task UpdateAsync(GoogleUserCredentials googleUserCredentials);
     }
 }

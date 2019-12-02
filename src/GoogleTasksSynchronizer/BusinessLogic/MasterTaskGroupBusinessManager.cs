@@ -31,7 +31,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
             foreach (var synchronizationTarget in _synchronizationTargetsOptions.Value.SynchronizationTargets)
             {
-                if (masterTaskGroups.Any(m => m.SynchronizationId == synchronizationTarget.SynchronizationId))
+                if (MasterTaskGroupExists(masterTaskGroups, synchronizationTarget.SynchronizationId))
                 {
                     await AddTasksToMasterTaskGroup(masterTaskGroups, synchronizationTarget);
                 }
@@ -42,6 +42,11 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             }
 
             return masterTaskGroups;
+        }
+
+        private static bool MasterTaskGroupExists(List<MasterTaskGroup> masterTaskGroups, string synchronizationId)
+        {
+            return masterTaskGroups.Any(m => m.SynchronizationId == synchronizationId);
         }
 
         private async Task<MasterTaskGroup> CreateMasterTaskGroup(SynchronizationTarget synchronizationTarget)

@@ -1,6 +1,5 @@
 ﻿using Google.Apis.Services;
 using Google.Apis.Tasks.v1;
-using GoogleTasksSynchronizer.Google;
 using GoogleTasksSynchronizer.Models;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
