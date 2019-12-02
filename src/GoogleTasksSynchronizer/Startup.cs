@@ -25,6 +25,7 @@ namespace GoogleTasksSynchronizer
 
             builder.Services.AddOptions<SynchronizationTargetsOptions>()
                 .Configure<IConfiguration>((settings, configuration) => { configuration.Bind(settings); });
+            builder.Services.AddScoped<ISynchronizationTargetManager, SynchronizationTargetManager>();
             builder.Services.AddScoped<IMasterTaskBusinessManager, MasterTaskBusinessManager>();
             builder.Services.AddScoped<IMasterTaskManager, MasterTaskManager>();
 
@@ -34,10 +35,12 @@ namespace GoogleTasksSynchronizer
 
             builder.Services.AddScoped<IGoogleClientSecretProvider, GoogleClientSecretProvider>();
             builder.Services.AddScoped<IGoogleUserCredentialsManager, GoogleUserCredentialsManager>();
-            
+
             //builder.Services.AddScoped<ITasksSynchronizerStateManager, TasksSynchronizerStateManager>();
             //builder.Services.AddScoped<ITaskBusinessManager, TaskBusinessManager>();
             //builder.Services.AddScoped<IGoogleTaskAccountManager, GoogleTaskAccountManager>();
+
+            builder.Services.AddScoped<ITaskListLogger, TaskListLogger>();
         }
     }
 }

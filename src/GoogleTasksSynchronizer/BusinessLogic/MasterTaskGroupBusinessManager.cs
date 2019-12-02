@@ -1,8 +1,6 @@
 ﻿using GoogleTasksSynchronizer.BusinessLogic.Data;
 using GoogleTasksSynchronizer.Configuration;
 using GoogleTasksSynchronizer.Models;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,17 +9,17 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 {
     public class MasterTaskGroupBusinessManager : IMasterTaskGroupBusinessManager
     {
-        private readonly IOptions<SynchronizationTargetsOptions> _synchronizationTargetsOptions;
+        private readonly ISynchronizationTargetManager _synchronizationTargetManager;
         private readonly IMasterTaskBusinessManager _masterTaskBusinessManager;
         private readonly ITaskBusinessManager _taskBusinessManager;
 
         public MasterTaskGroupBusinessManager(
-            IOptions<SynchronizationTargetsOptions> synchronizationTargetsOptions,
+            ISynchronizationTargetManager synchronizationTargetManager,
             IMasterTaskBusinessManager masterTaskBusinessManager,
             ITaskBusinessManager taskBusinessManager
             )
         {
-            _synchronizationTargetsOptions = synchronizationTargetsOptions;
+            _synchronizationTargetManager = synchronizationTargetManager;
             _masterTaskBusinessManager = masterTaskBusinessManager;
             _taskBusinessManager = taskBusinessManager;
         }
@@ -30,7 +28,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         {
             var masterTaskGroups = new List<MasterTaskGroup>();
 
-            var synchronizationTargets = JsonConvert.DeserializeObject<List<SynchronizationTarget>>(_synchronizationTargetsOptions.Value.SynchronizationTargets);
+            var synchronizationTargets = await _synchronizationTargetManager.SelectAllAsync();
 
             foreach (var synchronizationTarget in synchronizationTargets)
             {
