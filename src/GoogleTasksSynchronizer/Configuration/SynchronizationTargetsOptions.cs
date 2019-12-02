@@ -6,6 +6,6 @@ namespace GoogleTasksSynchronizer.Configuration
 {
     public class SynchronizationTargetsOptions
     {
-        public List<SynchronizationTarget> SynchronizationTargets { get; set; }
+        public string SynchronizationTargets { get; set; }
     }
 }

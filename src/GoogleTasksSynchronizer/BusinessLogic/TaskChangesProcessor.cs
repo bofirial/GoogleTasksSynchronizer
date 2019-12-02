@@ -12,7 +12,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 {
     public class TaskChangesProcessor : ITaskChangesProcessor
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<TaskChangesProcessor> _logger;
         private readonly IMasterTaskGroupBusinessManager _masterTaskGroupBusinessManager;
 
         //private readonly IGoogleTaskAccountManager _googleTaskAccountManager;
@@ -20,7 +20,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         //private readonly ITaskBusinessManager _taskBusinessManager;
 
         public TaskChangesProcessor(
-            ILogger logger,
+            ILogger<TaskChangesProcessor> logger,
             IMasterTaskGroupBusinessManager masterTaskGroupBusinessManager
             //IGoogleTaskAccountManager googleTaskAccountManager,
             //ITaskChangeCalculator taskChangeCalculator,

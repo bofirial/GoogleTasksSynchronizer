@@ -2,6 +2,7 @@
 using GoogleTasksSynchronizer.Configuration;
 using GoogleTasksSynchronizer.Models;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,7 +30,9 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         {
             var masterTaskGroups = new List<MasterTaskGroup>();
 
-            foreach (var synchronizationTarget in _synchronizationTargetsOptions.Value.SynchronizationTargets)
+            var synchronizationTargets = JsonConvert.DeserializeObject<List<SynchronizationTarget>>(_synchronizationTargetsOptions.Value.SynchronizationTargets);
+
+            foreach (var synchronizationTarget in synchronizationTargets)
             {
                 if (MasterTaskGroupExists(masterTaskGroups, synchronizationTarget.SynchronizationId))
                 {

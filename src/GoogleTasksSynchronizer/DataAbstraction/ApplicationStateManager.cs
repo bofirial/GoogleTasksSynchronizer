@@ -9,12 +9,14 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 {
     public class ApplicationStateManager : IApplicationStateManager
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<ApplicationStateManager> _logger;
 
         private CloudBlockBlob _applicationStateBlob;
         private ApplicationState _applicationState;
 
-        public ApplicationStateManager(ILogger logger)
+        private bool initialized = false;
+
+        public ApplicationStateManager(ILogger<ApplicationStateManager> logger)
         {
             _logger = logger;
         }
@@ -23,22 +25,26 @@ namespace GoogleTasksSynchronizer.DataAbstraction
         {
             _applicationStateBlob = applicationStateBlob;
 
+            initialized = true;
+
             return Task.CompletedTask;
         }
 
         public async Task<ApplicationState> SelectAsync()
         {
+            ValidateInitilization();
+
             if (_applicationState == null)
             {
-                var rawData = await _applicationStateBlob.DownloadTextAsync();
-
                 try
                 {
+                    var rawData = await _applicationStateBlob.DownloadTextAsync();
+
                     return JsonConvert.DeserializeObject<ApplicationState>(rawData);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning($"Failed to Deserialize the ApplicationState: {rawData}.  Exception Details: {e.Message}");
+                    _logger.LogWarning($"Failed to obtain the ApplicationState.  Exception Details: {e.Message}");
 
                     _applicationState = new ApplicationState();
                 }
@@ -49,11 +55,21 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
         public Task UpdateAsync(ApplicationState applicationState)
         {
+            ValidateInitilization();
+
             var serializedTasksSynchronizerState = JsonConvert.SerializeObject(applicationState);
 
             _applicationState = applicationState;
 
             return _applicationStateBlob.UploadTextAsync(serializedTasksSynchronizerState);
+        }
+
+        private void ValidateInitilization()
+        {
+            if (!initialized)
+            {
+                throw new InvalidOperationException("ApplicationStateManager must be initialized with a storage binding before it can be utilized");
+            }
         }
     }
 }
