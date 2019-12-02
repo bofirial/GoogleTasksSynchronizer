@@ -1,12 +1,5 @@
-﻿using Google.Apis.Services;
-using Google.Apis.Tasks.v1;
-using GoogleTasksSynchronizer.Models;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-
-using Google = Google.Apis.Tasks.v1.Data;
 
 namespace GoogleTasksSynchronizer.BusinessLogic
 {

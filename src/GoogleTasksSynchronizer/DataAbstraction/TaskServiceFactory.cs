@@ -2,7 +2,6 @@
 using Google.Apis.Services;
 using Google.Apis.Tasks.v1;
 using GoogleTasksSynchronizer.Configuration;
-using GoogleTasksSynchronizer.DataAbstraction.Google;
 using System.Threading;
 using System.Threading.Tasks;
 

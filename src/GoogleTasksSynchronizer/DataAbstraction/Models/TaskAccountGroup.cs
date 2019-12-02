@@ -1,7 +1,7 @@
 ﻿using Google = Google.Apis.Tasks.v1.Data;
 using System.Collections.Generic;
 
-namespace GoogleTasksSynchronizer.Models
+namespace GoogleTasksSynchronizer.DataAbstraction.Models
 {
 
     public class TaskAccountGroup

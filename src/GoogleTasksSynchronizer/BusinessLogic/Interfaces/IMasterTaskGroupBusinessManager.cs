@@ -1,4 +1,4 @@
-﻿using GoogleTasksSynchronizer.Models;
+﻿using GoogleTasksSynchronizer.DataAbstraction.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

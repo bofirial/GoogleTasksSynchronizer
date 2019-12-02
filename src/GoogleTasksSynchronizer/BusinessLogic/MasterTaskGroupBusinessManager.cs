@@ -1,6 +1,6 @@
 ﻿using GoogleTasksSynchronizer.BusinessLogic.Data;
 using GoogleTasksSynchronizer.Configuration;
-using GoogleTasksSynchronizer.Models;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,12 +9,12 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 {
     public class MasterTaskGroupBusinessManager : IMasterTaskGroupBusinessManager
     {
-        private readonly ISynchronizationTargetManager _synchronizationTargetManager;
+        private readonly ISynchronizationTargetsProvider _synchronizationTargetManager;
         private readonly IMasterTaskBusinessManager _masterTaskBusinessManager;
         private readonly ITaskBusinessManager _taskBusinessManager;
 
         public MasterTaskGroupBusinessManager(
-            ISynchronizationTargetManager synchronizationTargetManager,
+            ISynchronizationTargetsProvider synchronizationTargetManager,
             IMasterTaskBusinessManager masterTaskBusinessManager,
             ITaskBusinessManager taskBusinessManager
             )
@@ -28,7 +28,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         {
             var masterTaskGroups = new List<MasterTaskGroup>();
 
-            var synchronizationTargets = await _synchronizationTargetManager.SelectAllAsync();
+            var synchronizationTargets = await _synchronizationTargetManager.GetAsync();
 
             foreach (var synchronizationTarget in synchronizationTargets)
             {

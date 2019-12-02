@@ -11,10 +11,10 @@ namespace GoogleTasksSynchronizer
 {
     public class LogAvailableTaskListIds
     {
-        private readonly ISynchronizationTargetManager _synchronizationTargetManager;
+        private readonly ISynchronizationTargetsProvider _synchronizationTargetManager;
         private readonly ITaskListLogger _taskListLogger;
 
-        public LogAvailableTaskListIds(ISynchronizationTargetManager synchronizationTargetManager, ITaskListLogger taskListLogger)
+        public LogAvailableTaskListIds(ISynchronizationTargetsProvider synchronizationTargetManager, ITaskListLogger taskListLogger)
         {
             _synchronizationTargetManager = synchronizationTargetManager;
             _taskListLogger = taskListLogger;
@@ -28,7 +28,7 @@ namespace GoogleTasksSynchronizer
 
             if (null == googleAccountNames)
             {
-                var synchronizationTargets = await _synchronizationTargetManager.SelectAllAsync();
+                var synchronizationTargets = await _synchronizationTargetManager.GetAsync();
 
                 googleAccountNames = synchronizationTargets.Select(st => st.GoogleAccountName).Distinct().ToArray();
             }

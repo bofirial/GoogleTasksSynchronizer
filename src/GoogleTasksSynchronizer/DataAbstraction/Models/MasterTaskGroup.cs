@@ -1,9 +1,6 @@
-﻿using GoogleTasksSynchronizer.DataAbstraction.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace GoogleTasksSynchronizer.Models
+namespace GoogleTasksSynchronizer.DataAbstraction.Models
 {
     public class MasterTaskGroup
     {
