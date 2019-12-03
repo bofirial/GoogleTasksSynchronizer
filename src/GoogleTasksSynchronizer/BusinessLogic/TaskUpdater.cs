@@ -1,5 +1,6 @@
 ﻿using GoogleTasksSynchronizer.BusinessLogic.Data;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         public async Task UpdateTaskAsync(Google::Task task, MasterTask masterTask, List<TaskAccountGroup> taskAccountGroups)
         {
             _taskMapper.MapTask(masterTask, task);
+            masterTask.UpdatedOn = DateTime.Now;
 
             foreach (var accountToCheck in taskAccountGroups)
             {

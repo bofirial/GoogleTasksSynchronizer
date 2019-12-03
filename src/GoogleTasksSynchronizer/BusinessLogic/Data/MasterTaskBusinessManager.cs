@@ -1,6 +1,7 @@
 ﻿using GoogleTasksSynchronizer.Configuration;
 using GoogleTasksSynchronizer.DataAbstraction;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -22,6 +23,9 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
 
         public Task UpdateAsync(string synchronizationId, List<MasterTask> tasks)
         {
+            tasks.RemoveAll(t =>
+                t.UpdatedOn < DateTime.Today.AddDays(-7) && t.Deleted == true);
+
             return _masterTaskManager.UpdateAsync(synchronizationId, tasks);
         }
     }

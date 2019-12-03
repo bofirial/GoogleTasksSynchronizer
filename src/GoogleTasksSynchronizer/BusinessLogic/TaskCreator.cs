@@ -25,7 +25,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             var masterTask = new MasterTask()
             {
                 MasterTaskId = Guid.NewGuid().ToString(),
-                TaskMaps = new List<TaskMap>()
+                TaskMaps = new List<TaskMap>(),
+                UpdatedOn = DateTime.Now
             };
 
             _taskMapper.MapTask(masterTask, task);
