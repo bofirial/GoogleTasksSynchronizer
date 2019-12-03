@@ -43,20 +43,30 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
         public async Task ProcessTaskChangesAsync()
         {
+            //TODO: Validate no duplicate TaskListIDs
             var masterTaskGroups = await _masterTaskGroupBusinessManager.SelectAsync();
 
+            //TODO: Async?
             foreach (var masterTaskGroup in masterTaskGroups)
             {
+                _logger.LogInformation($"Processing Task Changes for lists with SynchronizationId: {masterTaskGroup.SynchronizationId}");
+
                 await ProcessTaskChangesAsync(masterTaskGroup);
             }
         }
 
         private async Task ProcessTaskChangesAsync(MasterTaskGroup masterTaskGroup)
         {
+            _logger.LogInformation($"{masterTaskGroup.MasterTasks.Count} master tasks stored for: {masterTaskGroup.SynchronizationId}");
+
             foreach (var taskAccountGroup in masterTaskGroup.TaskAccountGroups)
             {
+                _logger.LogInformation($"{masterTaskGroup.MasterTasks.Count} tasks to process for " +
+                    $"Google Account ({taskAccountGroup.SynchronizationTarget}) and SyncronizationId ({masterTaskGroup.SynchronizationId})");
+
                 foreach (var task in taskAccountGroup.Tasks)
                 {
+                    //TODO: Async?
                     await ProcessTaskChangeAsync(masterTaskGroup, task);
                 }
             }
@@ -72,6 +82,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             {
                 if (task.Hidden != true && task.Deleted != true)
                 {
+                    _logger.LogInformation($"Creating task with Title ({task.Title}) for SyncronizationId ({masterTaskGroup.SynchronizationId})");
+
                     masterTaskGroup.MasterTasks.Add(await _taskCreator.CreateNewTaskAsync(task, masterTaskGroup.TaskAccountGroups));
                 }
             }
@@ -86,6 +98,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                 if (!_taskBusinessManager.TasksAreEqual(masterTask, task) && !_updatedMasterTasks.Contains(masterTask.MasterTaskId))
                 {
+                    _logger.LogInformation($"Updating task with Title ({masterTask.Title}) for SyncronizationId ({masterTaskGroup.SynchronizationId})");
+
                     await _taskUpdater.UpdateTaskAsync(task, masterTask, masterTaskGroup.TaskAccountGroups);
 
                     _updatedMasterTasks.Add(masterTask.MasterTaskId);
