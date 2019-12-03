@@ -65,7 +65,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             {
                 if (task.Hidden != true && task.Deleted != true)
                 {
-                    await CreateNewTaskAsync(masterTaskGroup, task);
+                    masterTaskGroup.MasterTasks.Add(await CreateNewTaskAsync(task, masterTaskGroup.TaskAccountGroups));
                 }
             }
             else
@@ -74,57 +74,57 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                 {
                     masterTask.Hidden = task.Hidden;
 
-                    await ClearTasksAsync(masterTaskGroup);
+                    await ClearTasksAsync(masterTaskGroup.TaskAccountGroups);
                 }
 
                 if (!_taskBusinessManager.TasksAreEqual(masterTask, task) && !_updatedMasterTasks.Contains(masterTask.MasterTaskId))
                 {
-                    await UpdateTaskAsync(masterTaskGroup, task, masterTask);
+                    await UpdateTaskAsync(task, masterTask, masterTaskGroup.TaskAccountGroups);
 
                     _updatedMasterTasks.Add(masterTask.MasterTaskId);
                 }
             }
         }
 
-        private async Task CreateNewTaskAsync(MasterTaskGroup masterTaskGroup, Google::Task task)
+        private async Task<MasterTask> CreateNewTaskAsync(Google::Task task, List<TaskAccountGroup> taskAccountGroups)
         {
-            var newMasterTask = new MasterTask()
+            var masterTask = new MasterTask()
             {
                 MasterTaskId = Guid.NewGuid().ToString(),
                 TaskMaps = new List<TaskMap>()
             };
 
-            _taskMapper.MapTask(task, newMasterTask);
+            _taskMapper.MapTask(task, masterTask);
 
-            foreach (var accountToCheck in masterTaskGroup.TaskAccountGroups)
+            foreach (var accountToCheck in taskAccountGroups)
             {
                 //CONSIDER: Duplicate Tasks are hidden here
-                var matchedTask = accountToCheck.Tasks.Where(t => _taskBusinessManager.TasksAreEqual(newMasterTask, t)).FirstOrDefault();
+                var matchedTask = accountToCheck.Tasks.Where(t => _taskBusinessManager.TasksAreEqual(masterTask, t)).FirstOrDefault();
 
                 if (null == matchedTask)
                 {
                     var newTask = new Google::Task();
 
-                    _taskMapper.MapTask(newMasterTask, newTask);
+                    _taskMapper.MapTask(masterTask, newTask);
 
                     matchedTask = await _taskBusinessManager.InsertAsync(matchedTask, accountToCheck.SynchronizationTarget);
                 }
 
-                newMasterTask.TaskMaps.Add(new TaskMap()
+                masterTask.TaskMaps.Add(new TaskMap()
                 {
                     SynchronizationTarget = accountToCheck.SynchronizationTarget,
                     TaskId = matchedTask.Id
                 });
             }
 
-            masterTaskGroup.MasterTasks.Add(newMasterTask);
+            return masterTask;
         }
 
-        private async Task UpdateTaskAsync(MasterTaskGroup masterTaskGroup, Google::Task task, MasterTask masterTask)
+        private async Task UpdateTaskAsync(Google::Task task, MasterTask masterTask, List<TaskAccountGroup> taskAccountGroups)
         {
             _taskMapper.MapTask(task, masterTask);
 
-            foreach (var accountToCheck in masterTaskGroup.TaskAccountGroups)
+            foreach (var accountToCheck in taskAccountGroups)
             {
                 //TODO: Handle Missing TaskMaps?
                 var targetTaskId = masterTask.TaskMaps.FirstOrDefault(tm =>
@@ -141,9 +141,9 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             }
         }
 
-        private async Task ClearTasksAsync(MasterTaskGroup masterTaskGroup)
+        private async Task ClearTasksAsync(List<TaskAccountGroup> taskAccountGroups)
         {
-            foreach (var accountToClear in masterTaskGroup.TaskAccountGroups)
+            foreach (var accountToClear in taskAccountGroups)
             {
                 await _taskBusinessManager.ClearAsync(accountToClear.SynchronizationTarget);
             }
