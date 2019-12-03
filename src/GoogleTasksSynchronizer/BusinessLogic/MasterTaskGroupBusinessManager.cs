@@ -74,8 +74,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         {
             return new TaskAccountGroup()
             {
-                GoogleAccountName = synchronizationTarget.GoogleAccountName,
-                TaskListId = synchronizationTarget.TaskListId,
+                SynchronizationTarget = synchronizationTarget,
                 Tasks = await _taskBusinessManager.SelectAllAsync(synchronizationTarget)
             };
         }
