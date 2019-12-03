@@ -1,7 +1,6 @@
 ﻿using GoogleTasksSynchronizer.BusinessLogic.Data;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,13 +45,16 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             //TODO: Validate no duplicate TaskListIDs
             var masterTaskGroups = await _masterTaskGroupBusinessManager.SelectAsync();
 
-            //TODO: Async?
+            var tasks = new List<Task>();
+
             foreach (var masterTaskGroup in masterTaskGroups)
             {
                 _logger.LogInformation($"Processing Task Changes for lists with SynchronizationId: {masterTaskGroup.SynchronizationId}");
 
-                await ProcessTaskChangesAsync(masterTaskGroup);
+                tasks.Add(ProcessTaskChangesAsync(masterTaskGroup));
             }
+
+            await Task.WhenAll(tasks);
         }
 
         private async Task ProcessTaskChangesAsync(MasterTaskGroup masterTaskGroup)
@@ -64,11 +66,14 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                 _logger.LogInformation($"{masterTaskGroup.MasterTasks.Count} tasks to process for " +
                     $"Google Account ({taskAccountGroup.SynchronizationTarget}) and SyncronizationId ({masterTaskGroup.SynchronizationId})");
 
+                var tasks = new List<Task>();
+
                 foreach (var task in taskAccountGroup.Tasks)
                 {
-                    //TODO: Async?
-                    await ProcessTaskChangeAsync(masterTaskGroup, task);
+                    tasks.Add(ProcessTaskChangeAsync(masterTaskGroup, task));
                 }
+
+                await Task.WhenAll(tasks);
             }
 
             await _masterTaskBusinessManager.UpdateAsync(masterTaskGroup.SynchronizationId, masterTaskGroup.MasterTasks);
