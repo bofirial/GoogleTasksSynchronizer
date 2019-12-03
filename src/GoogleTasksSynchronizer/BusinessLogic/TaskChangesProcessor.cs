@@ -1,6 +1,7 @@
 ﻿using GoogleTasksSynchronizer.BusinessLogic.Data;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +16,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         private readonly IMasterTaskGroupBusinessManager _masterTaskGroupBusinessManager;
         private readonly ITaskBusinessManager _taskBusinessManager;
         private readonly ITaskMapper _taskMapper;
+
+        private readonly HashSet<string> _updatedMasterTasks = new HashSet<string>();
 
         public TaskChangesProcessor(
             ILogger<TaskChangesProcessor> logger,
@@ -47,6 +50,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                             {
                                 masterTask = new MasterTask()
                                 {
+                                    MasterTaskId = Guid.NewGuid().ToString(),
                                     TaskMaps = new List<TaskMap>()
                                 };
 
@@ -89,7 +93,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                             }
                         }
 
-                        if (!_taskBusinessManager.TasksAreEqual(masterTask, task))
+                        if (!_taskBusinessManager.TasksAreEqual(masterTask, task) && !_updatedMasterTasks.Contains(masterTask.MasterTaskId))
                         {
                             _taskMapper.MapTask(task, masterTask);
 
@@ -108,6 +112,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                                     await _taskBusinessManager.UpdateAsync(matchedTask, accountToCheck.SynchronizationTarget);
                                 }
                             }
+
+                            _updatedMasterTasks.Add(masterTask.MasterTaskId);
                         }
                     }
                 }

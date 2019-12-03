@@ -5,6 +5,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction.Models
 {
     public class MasterTask
     {
+        public string MasterTaskId { get; set; }
         public string Title  { get; set; }
         public DateTime? Due { get; set; }
         public string Notes { get; set; }
