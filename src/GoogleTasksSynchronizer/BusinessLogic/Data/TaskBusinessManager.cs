@@ -34,9 +34,9 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
             await _taskManager.UpdateAsync(task, synchronizationTarget);
         }
 
-        public async Task ClearAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
+        public async Task ClearAsync(SynchronizationTarget synchronizationTarget)
         {
-            await _taskManager.ClearAsync(task, synchronizationTarget);
+            await _taskManager.ClearAsync(synchronizationTarget);
         }
 
         public bool TasksAreEqual(MasterTask masterTask, Google::Task task)

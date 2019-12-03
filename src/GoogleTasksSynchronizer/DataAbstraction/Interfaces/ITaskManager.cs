@@ -14,6 +14,6 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
         Task UpdateAsync(Google::Task task, SynchronizationTarget synchronizationTarget);
 
-        Task ClearAsync(Google::Task task, SynchronizationTarget synchronizationTarget);
+        Task ClearAsync(SynchronizationTarget synchronizationTarget);
     }
 }

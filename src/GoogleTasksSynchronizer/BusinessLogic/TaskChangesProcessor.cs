@@ -85,8 +85,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                             foreach (var accountToClear in masterTaskGroup.TaskAccountGroups)
                             {
-                                //TODO: Task may not belong to Account?
-                                await _taskBusinessManager.ClearAsync(task, accountToClear.SynchronizationTarget);
+                                await _taskBusinessManager.ClearAsync(accountToClear.SynchronizationTarget);
                             }
                         }
 

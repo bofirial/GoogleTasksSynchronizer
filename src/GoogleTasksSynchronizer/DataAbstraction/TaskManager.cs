@@ -81,7 +81,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             await updateRequest.ExecuteAsync();
         }
 
-        public async Task ClearAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
+        public async Task ClearAsync(SynchronizationTarget synchronizationTarget)
         {
             await _singleExecutionEnforcementExecutor.ExecuteOnceAsync(async taskListId =>
             {
