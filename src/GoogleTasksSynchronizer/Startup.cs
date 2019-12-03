@@ -36,6 +36,10 @@ namespace GoogleTasksSynchronizer
             builder.Services.AddScoped<IGoogleClientSecretProvider, GoogleClientSecretProvider>();
             builder.Services.AddScoped<IGoogleUserCredentialsManager, GoogleUserCredentialsManager>();
 
+            builder.Services.AddScoped<ITaskCreator, TaskCreator>();
+            builder.Services.AddScoped<ITaskUpdater, TaskUpdater>();
+            builder.Services.AddScoped<ITaskClearer, TaskClearer>();
+
             builder.Services.AddScoped<ITaskMapper, TaskMapper>();
             builder.Services.AddSingleton<ISingleExecutionEnforcementExecutor, SingleExecutionEnforcementExecutor>();
 
