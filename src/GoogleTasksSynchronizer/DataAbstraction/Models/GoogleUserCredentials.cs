@@ -2,7 +2,7 @@
 
 namespace GoogleTasksSynchronizer.DataAbstraction.Models
 {
-    public class GoogleUserCredentials : Dictionary<string, string>
+    public class GoogleUserCredentialsDictionary : Dictionary<string, string>
     {
     }
 }

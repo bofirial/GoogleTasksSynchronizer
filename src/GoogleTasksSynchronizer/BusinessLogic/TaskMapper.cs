@@ -1,5 +1,6 @@
 ﻿using Google.Apis.Tasks.v1.Data;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
+using System;
 
 namespace GoogleTasksSynchronizer.BusinessLogic
 {
@@ -7,6 +8,9 @@ namespace GoogleTasksSynchronizer.BusinessLogic
     {
         public void MapTask(Task toTask, MasterTask fromTask)
         {
+            toTask = toTask ?? throw new ArgumentNullException(nameof(toTask));
+            fromTask = fromTask ?? throw new ArgumentNullException(nameof(fromTask));
+
             toTask.Title = fromTask.Title;
             toTask.Due = fromTask.Due;
             toTask.Notes = fromTask.Notes;
@@ -17,6 +21,9 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
         public void MapTask(MasterTask toTask, Task fromTask)
         {
+            toTask = toTask ?? throw new ArgumentNullException(nameof(toTask));
+            fromTask = fromTask ?? throw new ArgumentNullException(nameof(fromTask));
+
             toTask.Title = fromTask.Title;
             toTask.Due = fromTask.Due;
             toTask.Notes = fromTask.Notes;

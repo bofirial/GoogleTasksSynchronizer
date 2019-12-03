@@ -22,6 +22,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
         public async Task<MasterTask> CreateNewTaskAsync(Google::Task task, List<TaskAccountGroup> taskAccountGroups)
         {
+            taskAccountGroups = taskAccountGroups ?? throw new ArgumentNullException(nameof(taskAccountGroups));
+
             var masterTask = new MasterTask()
             {
                 MasterTaskId = Guid.NewGuid().ToString(),

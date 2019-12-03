@@ -2,6 +2,7 @@
 using Google.Apis.Services;
 using Google.Apis.Tasks.v1;
 using GoogleTasksSynchronizer.Configuration;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +24,8 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
         public async Task<TasksService> CreateTaskServiceAsync(SynchronizationTarget synchronizationTarget)
         {
+            synchronizationTarget = synchronizationTarget ?? throw new ArgumentNullException(nameof(synchronizationTarget));
+
             return new TasksService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = await GoogleWebAuthorizationBroker.AuthorizeAsync(

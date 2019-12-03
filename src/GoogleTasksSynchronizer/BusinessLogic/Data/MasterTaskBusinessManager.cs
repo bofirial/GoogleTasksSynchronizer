@@ -23,6 +23,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
 
         public Task UpdateAsync(string synchronizationId, List<MasterTask> tasks)
         {
+            tasks = tasks ?? throw new ArgumentNullException(nameof(tasks));
+
             tasks.RemoveAll(t =>
                 t.UpdatedOn < DateTime.Today.AddDays(-7) && t.Deleted == true);
 

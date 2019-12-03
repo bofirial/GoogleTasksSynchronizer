@@ -22,6 +22,9 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
         public async Task UpdateTaskAsync(Google::Task task, MasterTask masterTask, List<TaskAccountGroup> taskAccountGroups)
         {
+            masterTask = masterTask ?? throw new ArgumentNullException(nameof(masterTask));
+            taskAccountGroups = taskAccountGroups ?? throw new ArgumentNullException(nameof(taskAccountGroups));
+
             _taskMapper.MapTask(masterTask, task);
             masterTask.UpdatedOn = DateTime.Now;
 

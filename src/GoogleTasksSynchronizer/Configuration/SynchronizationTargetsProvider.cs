@@ -30,7 +30,7 @@ namespace GoogleTasksSynchronizer.Configuration
         {
             if (synchronizationTargets.GroupBy(s => s.TaskListId).Any(t => t.Count() > 1))
             {
-                throw new Exception($"Invalid Configuration: TaskListId can only be used once in SyncronizationTargets");
+                throw new Exception("Invalid Configuration: TaskListId can only be used once in SyncronizationTargets");
             }
         }
     }

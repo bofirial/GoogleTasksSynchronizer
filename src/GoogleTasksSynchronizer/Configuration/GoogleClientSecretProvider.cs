@@ -12,7 +12,7 @@ namespace GoogleTasksSynchronizer.Configuration
             //TODO: Consider switching this to use Configuration
             var googleClientSecretJson = Environment.GetEnvironmentVariable("GoogleClientSecret");
 
-            var memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(googleClientSecretJson));
+            using var memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(googleClientSecretJson));
 
             return GoogleClientSecrets.Load(memoryStream).Secrets;
         }

@@ -2,6 +2,7 @@
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
@@ -21,6 +22,8 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
         public async Task LogAllTaskListsAsync(string[] googleAccountNames)
         {
+            googleAccountNames = googleAccountNames ?? throw new ArgumentNullException(nameof(googleAccountNames));
+
             foreach (var googleAccountName in googleAccountNames)
             {
                 var taskService = await _taskServiceFactory.CreateTaskServiceAsync(new SynchronizationTarget() { GoogleAccountName = googleAccountName });

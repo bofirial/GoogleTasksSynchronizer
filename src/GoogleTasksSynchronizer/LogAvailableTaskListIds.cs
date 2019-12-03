@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using GoogleTasksSynchronizer.DataAbstraction;
 using GoogleTasksSynchronizer.Configuration;
 using System.Linq;
+using System;
 
 namespace GoogleTasksSynchronizer
 {
@@ -22,9 +23,11 @@ namespace GoogleTasksSynchronizer
 
         [FunctionName("LogAvailableTaskListIds")]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest request)
         {
-            string[] googleAccountNames = req.Query["googleAccountName"];
+            request = request ?? throw new ArgumentNullException(nameof(request));
+
+            string[] googleAccountNames = request.Query["googleAccountName"];
 
             if (null == googleAccountNames || googleAccountNames.Length == 0)
             {

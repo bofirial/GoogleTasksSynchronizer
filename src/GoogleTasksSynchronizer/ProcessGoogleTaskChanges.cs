@@ -29,6 +29,8 @@ namespace GoogleTasksSynchronizer
             [TimerTrigger("*/15 * 6-23 * * *", RunOnStartup = true)]TimerInfo myTimer, 
             [Blob("jschaferfunctions/tasksSynchronizerStateBlob.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob tasksSynchronizerStateBlob)
         {
+            myTimer = myTimer ?? throw new ArgumentNullException(nameof(myTimer));
+
             _logger.LogInformation($"ProcessGoogleTaskChanges Timer trigger function started at: {DateTime.Now}.  It {(myTimer.IsPastDue ? "was" : "was not")} past due.");
 
             await _applicationStateManager.InitializeFromBindingAsync(tasksSynchronizerStateBlob);

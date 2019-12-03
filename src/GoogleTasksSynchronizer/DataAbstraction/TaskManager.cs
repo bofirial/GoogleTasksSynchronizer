@@ -3,6 +3,7 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 
 using Google = Google.Apis.Tasks.v1.Data;
@@ -24,6 +25,8 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
         public async Task<List<Google::Task>> SelectAllAsync(SynchronizationTarget synchronizationTarget)
         {
+            synchronizationTarget = synchronizationTarget ?? throw new ArgumentNullException(nameof(synchronizationTarget));
+
             var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
 
             var listRequest = taskService.Tasks.List(synchronizationTarget.TaskListId);
@@ -32,7 +35,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             listRequest.ShowDeleted = true;
             listRequest.ShowHidden = true;
 
-            listRequest.UpdatedMin = DateTime.Today.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
+            listRequest.UpdatedMin = DateTime.Today.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture);
 
             var tasks = new List<Google::Task>();
 
@@ -58,6 +61,8 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
         public async Task<Google::Task> InsertAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
         {
+            synchronizationTarget = synchronizationTarget ?? throw new ArgumentNullException(nameof(synchronizationTarget));
+
             var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
 
             var insertRequest = taskService.Tasks.Insert(task, synchronizationTarget.TaskListId);
@@ -69,6 +74,9 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
         public async Task UpdateAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
         {
+            task = task ?? throw new ArgumentNullException(nameof(task));
+            synchronizationTarget = synchronizationTarget ?? throw new ArgumentNullException(nameof(synchronizationTarget));
+
             var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
 
             var updateRequest = taskService.Tasks.Update(task, synchronizationTarget.TaskListId, task.Id);

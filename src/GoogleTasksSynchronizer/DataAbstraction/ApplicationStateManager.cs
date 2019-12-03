@@ -14,7 +14,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
         private CloudBlockBlob _applicationStateBlob;
         private ApplicationState _applicationState;
 
-        private bool initialized = false;
+        private bool _initialized = false;
 
         public ApplicationStateManager(ILogger<ApplicationStateManager> logger)
         {
@@ -25,7 +25,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
         {
             _applicationStateBlob = applicationStateBlob;
 
-            initialized = true;
+            _initialized = true;
 
             return Task.CompletedTask;
         }
@@ -66,7 +66,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
         private void ValidateInitilization()
         {
-            if (!initialized)
+            if (!_initialized)
             {
                 throw new InvalidOperationException("ApplicationStateManager must be initialized with a storage binding before it can be utilized");
             }

@@ -1,6 +1,7 @@
 ﻿using GoogleTasksSynchronizer.Configuration;
 using GoogleTasksSynchronizer.DataAbstraction;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -36,6 +37,9 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
 
         public bool TasksAreEqual(MasterTask masterTask, Google::Task task)
         {
+            masterTask = masterTask ?? throw new ArgumentNullException(nameof(masterTask));
+            task = task ?? throw new ArgumentNullException(nameof(task));
+
             return masterTask.Title == task.Title &&
                     masterTask.Due == task.Due &&
                     masterTask.Notes == task.Notes &&

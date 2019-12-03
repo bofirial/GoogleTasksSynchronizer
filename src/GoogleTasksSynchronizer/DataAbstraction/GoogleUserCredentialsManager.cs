@@ -13,14 +13,14 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             _applicationStateManager = applicationStateManager;
         }
 
-        private async Task<GoogleUserCredentials> GetGoogleUserCredentials()
+        private async Task<GoogleUserCredentialsDictionary> GetGoogleUserCredentials()
         {
             var applicationState = await _applicationStateManager.SelectAsync();
 
             return applicationState.GoogleUserCredentials;
         }
 
-        private async Task UpdateGoogleUserCredentials(GoogleUserCredentials googleUserCredentials)
+        private async Task UpdateGoogleUserCredentials(GoogleUserCredentialsDictionary googleUserCredentials)
         {
             var applicationState = await _applicationStateManager.SelectAsync();
 
