@@ -42,7 +42,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
         public async Task ProcessTaskChangesAsync()
         {
-            //TODO: Validate no duplicate TaskListIDs
             var masterTaskGroups = await _masterTaskGroupBusinessManager.SelectAsync();
 
             var tasks = new List<Task>();

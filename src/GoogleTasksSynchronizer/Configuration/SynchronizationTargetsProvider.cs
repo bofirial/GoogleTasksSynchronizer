@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GoogleTasksSynchronizer.Configuration
@@ -17,7 +19,19 @@ namespace GoogleTasksSynchronizer.Configuration
 
         public Task<List<SynchronizationTarget>> GetAsync()
         {
-            return Task.FromResult(JsonConvert.DeserializeObject<List<SynchronizationTarget>>(_synchronizationTargetsOptions.Value.SynchronizationTargets));
+            var synchronizationTargets = JsonConvert.DeserializeObject<List<SynchronizationTarget>>(_synchronizationTargetsOptions.Value.SynchronizationTargets);
+
+            ValidateSynchronizationTargets(synchronizationTargets);
+
+            return Task.FromResult(synchronizationTargets);
+        }
+
+        private void ValidateSynchronizationTargets(List<SynchronizationTarget> synchronizationTargets)
+        {
+            if (synchronizationTargets.GroupBy(s => s.TaskListId).Any(t => t.Count() > 1))
+            {
+                throw new Exception($"Invalid Configuration: TaskListId can only be used once in SyncronizationTargets");
+            }
         }
     }
 }
