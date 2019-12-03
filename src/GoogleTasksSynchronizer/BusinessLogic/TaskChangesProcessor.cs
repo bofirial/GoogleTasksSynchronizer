@@ -17,7 +17,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         private readonly IMasterTaskBusinessManager _masterTaskBusinessManager;
         private readonly ITaskCreator _taskCreator;
         private readonly ITaskUpdater _taskUpdater;
-        private readonly ITaskClearer _taskClearer;
 
         private readonly HashSet<string> _updatedMasterTasks = new HashSet<string>();
 
@@ -27,8 +26,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             ITaskBusinessManager taskBusinessManager,
             IMasterTaskBusinessManager masterTaskBusinessManager,
             ITaskCreator taskCreator,
-            ITaskUpdater taskUpdater,
-            ITaskClearer taskClearer
+            ITaskUpdater taskUpdater
             )
         {
             _logger = logger;
@@ -37,7 +35,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             _masterTaskBusinessManager = masterTaskBusinessManager;
             _taskCreator = taskCreator;
             _taskUpdater = taskUpdater;
-            _taskClearer = taskClearer;
         }
 
         public async Task ProcessTaskChangesAsync()
@@ -91,23 +88,13 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                     masterTaskGroup.MasterTasks.Add(await _taskCreator.CreateNewTaskAsync(task, masterTaskGroup.TaskAccountGroups));
                 }
             }
-            else
+            else if (!_taskBusinessManager.TasksAreEqual(masterTask, task) && !_updatedMasterTasks.Contains(masterTask.MasterTaskId))
             {
-                if (masterTask.Hidden != task.Hidden)
-                {
-                    masterTask.Hidden = task.Hidden;
+                _logger.LogInformation($"Updating task with Title ({masterTask.Title}) for SyncronizationId ({masterTaskGroup.SynchronizationId})");
 
-                    await _taskClearer.ClearTasksAsync(masterTaskGroup.TaskAccountGroups);
-                }
+                await _taskUpdater.UpdateTaskAsync(task, masterTask, masterTaskGroup.TaskAccountGroups);
 
-                if (!_taskBusinessManager.TasksAreEqual(masterTask, task) && !_updatedMasterTasks.Contains(masterTask.MasterTaskId))
-                {
-                    _logger.LogInformation($"Updating task with Title ({masterTask.Title}) for SyncronizationId ({masterTaskGroup.SynchronizationId})");
-
-                    await _taskUpdater.UpdateTaskAsync(task, masterTask, masterTaskGroup.TaskAccountGroups);
-
-                    _updatedMasterTasks.Add(masterTask.MasterTaskId);
-                }
+                _updatedMasterTasks.Add(masterTask.MasterTaskId);
             }
         }
     }

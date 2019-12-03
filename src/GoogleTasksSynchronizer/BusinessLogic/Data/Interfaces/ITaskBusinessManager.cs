@@ -15,8 +15,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
 
         Task UpdateAsync(Google::Task task, SynchronizationTarget synchronizationTarget);
 
-        Task ClearAsync(SynchronizationTarget synchronizationTarget);
-
         bool TasksAreEqual(MasterTask masterTask, Google::Task task);
     }
 }

@@ -2,7 +2,6 @@
 using GoogleTasksSynchronizer.BusinessLogic.Data;
 using GoogleTasksSynchronizer.Configuration;
 using GoogleTasksSynchronizer.DataAbstraction;
-using GoogleTasksSynchronizer.DataAbstraction.Execution;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,10 +37,8 @@ namespace GoogleTasksSynchronizer
 
             builder.Services.AddScoped<ITaskCreator, TaskCreator>();
             builder.Services.AddScoped<ITaskUpdater, TaskUpdater>();
-            builder.Services.AddScoped<ITaskClearer, TaskClearer>();
 
             builder.Services.AddScoped<ITaskMapper, TaskMapper>();
-            builder.Services.AddSingleton<ISingleExecutionEnforcementExecutor, SingleExecutionEnforcementExecutor>();
 
             builder.Services.AddScoped<ITaskListLogger, TaskListLogger>();
         }

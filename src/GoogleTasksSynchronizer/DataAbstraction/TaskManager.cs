@@ -12,16 +12,13 @@ namespace GoogleTasksSynchronizer.DataAbstraction
     public class TaskManager : ITaskManager
     {
         private readonly ITaskServiceFactory _taskServiceFactory;
-        private readonly ISingleExecutionEnforcementExecutor _singleExecutionEnforcementExecutor;
         private readonly TelemetryClient _telemetryClient;
 
         public TaskManager(
             ITaskServiceFactory taskServiceFactory, 
-            TelemetryConfiguration configuration, 
-            ISingleExecutionEnforcementExecutor singleExecutionEnforcementExecutor)
+            TelemetryConfiguration configuration)
         {
             _taskServiceFactory = taskServiceFactory;
-            _singleExecutionEnforcementExecutor = singleExecutionEnforcementExecutor;
             _telemetryClient = new TelemetryClient(configuration);
         }
 
@@ -79,18 +76,6 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             _telemetryClient.TrackEvent("GoogleAPICall");
             _telemetryClient.TrackEvent("ModifiedTask");
             await updateRequest.ExecuteAsync();
-        }
-
-        public async Task ClearAsync(SynchronizationTarget synchronizationTarget)
-        {
-            await _singleExecutionEnforcementExecutor.ExecuteOnceAsync(async taskListId =>
-            {
-                var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
-
-                _telemetryClient.TrackEvent("GoogleAPICall");
-                _telemetryClient.TrackEvent("ClearTasks");
-                await taskService.Tasks.Clear(taskListId).ExecuteAsync();
-            }, synchronizationTarget.TaskListId);
         }
     }
 }

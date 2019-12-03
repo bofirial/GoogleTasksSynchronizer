@@ -13,7 +13,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             toTask.Status = fromTask.Status;
             toTask.Deleted = fromTask.Deleted;
             toTask.Completed = fromTask.Completed;
-            toTask.Hidden = fromTask.Hidden;
         }
 
         public void MapTask(MasterTask toTask, Task fromTask)
@@ -24,7 +23,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             toTask.Status = fromTask.Status;
             toTask.Deleted = fromTask.Deleted;
             toTask.Completed = fromTask.Completed;
-            toTask.Hidden = fromTask.Hidden;
         }
     }
 }

@@ -34,11 +34,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
             await _taskManager.UpdateAsync(task, synchronizationTarget);
         }
 
-        public async Task ClearAsync(SynchronizationTarget synchronizationTarget)
-        {
-            await _taskManager.ClearAsync(synchronizationTarget);
-        }
-
         public bool TasksAreEqual(MasterTask masterTask, Google::Task task)
         {
             return masterTask.Title == task.Title &&
@@ -46,8 +41,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
                     masterTask.Notes == task.Notes &&
                     masterTask.Status == task.Status &&
                     masterTask.Deleted == task.Deleted &&
-                    masterTask.Completed == task.Completed &&
-                    masterTask.Hidden == task.Hidden;
+                    masterTask.Completed == task.Completed;
         }
     }
 }
