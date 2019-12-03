@@ -1,4 +1,5 @@
-﻿using GoogleTasksSynchronizer.DataAbstraction;
+﻿using GoogleTasksSynchronizer.Configuration;
+using GoogleTasksSynchronizer.DataAbstraction;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,14 +15,14 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
             _masterTaskManager = masterTaskManager;
         }
 
-        public Task<List<MasterTask>> SelectAllAsync()
+        public Task<List<MasterTask>> SelectAllAsync(string synchronizationId)
         {
-            return _masterTaskManager.SelectAllAsync();
+            return _masterTaskManager.SelectAllAsync(synchronizationId);
         }
 
-        public Task UpdateAsync(List<MasterTask> tasks)
+        public Task UpdateAsync(string synchronizationId, List<MasterTask> tasks)
         {
-            return _masterTaskManager.UpdateAsync(tasks);
+            return _masterTaskManager.UpdateAsync(synchronizationId, tasks);
         }
     }
 }

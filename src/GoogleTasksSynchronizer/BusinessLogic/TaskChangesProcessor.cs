@@ -16,20 +16,22 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         private readonly IMasterTaskGroupBusinessManager _masterTaskGroupBusinessManager;
         private readonly ITaskBusinessManager _taskBusinessManager;
         private readonly ITaskMapper _taskMapper;
-
+        private readonly IMasterTaskBusinessManager _masterTaskBusinessManager;
         private readonly HashSet<string> _updatedMasterTasks = new HashSet<string>();
 
         public TaskChangesProcessor(
             ILogger<TaskChangesProcessor> logger,
             IMasterTaskGroupBusinessManager masterTaskGroupBusinessManager,
             ITaskBusinessManager taskBusinessManager,
-            ITaskMapper taskMapper
+            ITaskMapper taskMapper,
+            IMasterTaskBusinessManager masterTaskBusinessManager
             )
         {
             _logger = logger;
             _masterTaskGroupBusinessManager = masterTaskGroupBusinessManager;
             _taskBusinessManager = taskBusinessManager;
             _taskMapper = taskMapper;
+            _masterTaskBusinessManager = masterTaskBusinessManager;
         }
 
         public async Task ProcessTaskChangesAsync()
@@ -117,6 +119,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                         }
                     }
                 }
+
+                await _masterTaskBusinessManager.UpdateAsync(masterTaskGroup.SynchronizationId, masterTaskGroup.MasterTasks);
             }
         }
     }

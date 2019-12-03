@@ -6,6 +6,6 @@ namespace GoogleTasksSynchronizer.DataAbstraction.Models
     {
         public GoogleUserCredentials GoogleUserCredentials { get; set; } = new GoogleUserCredentials();
 
-        public List<MasterTask> Tasks { get; set; } = new List<MasterTask>();
+        public Dictionary<string, List<MasterTask>> Tasks { get; set; } = new Dictionary<string, List<MasterTask>>();
     }
 }

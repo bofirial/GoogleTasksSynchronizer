@@ -55,7 +55,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             return new MasterTaskGroup()
             {
                 SynchronizationId = synchronizationTarget.SynchronizationId,
-                MasterTasks = await _masterTaskBusinessManager.SelectAllAsync(),
+                MasterTasks = await _masterTaskBusinessManager.SelectAllAsync(synchronizationTarget.SynchronizationId),
                 TaskAccountGroups = new List<TaskAccountGroup>()
                 {
                     await CreateTaskAccountGroup(synchronizationTarget)

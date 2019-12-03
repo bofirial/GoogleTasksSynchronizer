@@ -1,4 +1,5 @@
-﻿using GoogleTasksSynchronizer.DataAbstraction.Models;
+﻿using GoogleTasksSynchronizer.Configuration;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,16 +14,18 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             _applicationStateManager = applicationStateManager;
         }
 
-        public async Task<List<MasterTask>> SelectAllAsync()
+        public async Task<List<MasterTask>> SelectAllAsync(string synchronizationId)
         {
-            return (await _applicationStateManager.SelectAsync()).Tasks;
+            var tasksDictionary = (await _applicationStateManager.SelectAsync()).Tasks;
+
+            return tasksDictionary[synchronizationId];
         }
 
-        public async Task UpdateAsync(List<MasterTask> tasks)
+        public async Task UpdateAsync(string synchronizationId, List<MasterTask> tasks)
         {
             var applicationState = await _applicationStateManager.SelectAsync();
 
-            applicationState.Tasks = tasks;
+            applicationState.Tasks[synchronizationId] = tasks;
 
             await _applicationStateManager.UpdateAsync(applicationState);
         }
