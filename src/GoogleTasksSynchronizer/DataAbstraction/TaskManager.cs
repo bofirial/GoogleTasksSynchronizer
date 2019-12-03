@@ -12,11 +12,16 @@ namespace GoogleTasksSynchronizer.DataAbstraction
     public class TaskManager : ITaskManager
     {
         private readonly ITaskServiceFactory _taskServiceFactory;
+        private readonly ISingleExecutionEnforcementExecutor _singleExecutionEnforcementExecutor;
         private readonly TelemetryClient _telemetryClient;
 
-        public TaskManager(ITaskServiceFactory taskServiceFactory, TelemetryConfiguration configuration)
+        public TaskManager(
+            ITaskServiceFactory taskServiceFactory, 
+            TelemetryConfiguration configuration, 
+            ISingleExecutionEnforcementExecutor singleExecutionEnforcementExecutor)
         {
             _taskServiceFactory = taskServiceFactory;
+            _singleExecutionEnforcementExecutor = singleExecutionEnforcementExecutor;
             _telemetryClient = new TelemetryClient(configuration);
         }
 
@@ -41,7 +46,8 @@ namespace GoogleTasksSynchronizer.DataAbstraction
                 listRequest.PageToken = taskResult?.NextPageToken;
 
                 _telemetryClient.TrackEvent("GoogleAPICall");
-                taskResult = listRequest.Execute();
+                _telemetryClient.TrackEvent("GetTasks");
+                taskResult = await listRequest.ExecuteAsync();
 
                 if (null != taskResult?.Items)
                 {
@@ -61,7 +67,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             _telemetryClient.TrackEvent("GoogleAPICall");
             _telemetryClient.TrackEvent("CreatedTask");
-            return insertRequest.Execute();
+            return await insertRequest.ExecuteAsync();
         }
 
         public async Task UpdateAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
@@ -72,17 +78,19 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             _telemetryClient.TrackEvent("GoogleAPICall");
             _telemetryClient.TrackEvent("ModifiedTask");
-            updateRequest.Execute();
+            await updateRequest.ExecuteAsync();
         }
 
         public async Task ClearAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
-        { 
-            //TODO: Protect from multiple clearings in a single run because each clear clears all completed tasks
-            var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
+        {
+            await _singleExecutionEnforcementExecutor.ExecuteOnceAsync(async taskListId =>
+            {
+                var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
 
-            _telemetryClient.TrackEvent("GoogleAPICall");
-            _telemetryClient.TrackEvent("ClearTasks");
-            taskService.Tasks.Clear(synchronizationTarget.TaskListId).Execute();
+                _telemetryClient.TrackEvent("GoogleAPICall");
+                _telemetryClient.TrackEvent("ClearTasks");
+                await taskService.Tasks.Clear(taskListId).ExecuteAsync();
+            }, synchronizationTarget.TaskListId);
         }
     }
 }
