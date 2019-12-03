@@ -22,5 +22,20 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
         {
             return await _taskManager.SelectAllAsync(synchronizationTarget);
         }
+
+        public async Task<Google::Task> InsertAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
+        {
+            return await _taskManager.InsertAsync(task, synchronizationTarget);
+        }
+
+        public async Task UpdateAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
+        {
+            await _taskManager.UpdateAsync(task, synchronizationTarget);
+        }
+
+        public async Task ClearAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
+        {
+            await _taskManager.ClearAsync(task, synchronizationTarget);
+        }
     }
 }

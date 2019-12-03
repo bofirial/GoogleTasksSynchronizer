@@ -1,5 +1,4 @@
-﻿using Google.Apis.Tasks.v1.Data;
-using GoogleTasksSynchronizer.Configuration;
+﻿using GoogleTasksSynchronizer.Configuration;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using System;
@@ -35,14 +34,14 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             var tasks = new List<Google::Task>();
 
-            Tasks taskResult = null;
+            Google::Tasks taskResult = null;
 
             do
             {
                 listRequest.PageToken = taskResult?.NextPageToken;
 
-                taskResult = listRequest.Execute();
                 _telemetryClient.TrackEvent("GoogleAPICall");
+                taskResult = listRequest.Execute();
 
                 if (null != taskResult?.Items)
                 {
@@ -52,6 +51,38 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             } while (taskResult?.NextPageToken != null);
 
             return tasks;
+        }
+
+        public async Task<Google::Task> InsertAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
+        {
+            var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
+
+            var insertRequest = taskService.Tasks.Insert(task, synchronizationTarget.TaskListId);
+
+            _telemetryClient.TrackEvent("GoogleAPICall");
+            _telemetryClient.TrackEvent("CreatedTask");
+            return insertRequest.Execute();
+        }
+
+        public async Task UpdateAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
+        {
+            var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
+
+            var updateRequest = taskService.Tasks.Update(task, synchronizationTarget.TaskListId, task.Id);
+
+            _telemetryClient.TrackEvent("GoogleAPICall");
+            _telemetryClient.TrackEvent("ModifiedTask");
+            updateRequest.Execute();
+        }
+
+        public async Task ClearAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
+        { 
+            //TODO: Protect from multiple clearings in a single run because each clear clears all completed tasks
+            var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
+
+            _telemetryClient.TrackEvent("GoogleAPICall");
+            _telemetryClient.TrackEvent("ClearTasks");
+            taskService.Tasks.Clear(synchronizationTarget.TaskListId).Execute();
         }
     }
 }

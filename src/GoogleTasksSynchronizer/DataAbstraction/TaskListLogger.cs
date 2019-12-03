@@ -27,8 +27,8 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
                 var taskListRequest = taskService.Tasklists.List();
 
-                var response = await taskListRequest.ExecuteAsync();
                 _telemetryClient.TrackEvent("GoogleAPICall");
+                var response = await taskListRequest.ExecuteAsync();
 
                 foreach (var item in response.Items)
                 {

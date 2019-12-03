@@ -1,7 +1,5 @@
-﻿using GoogleTasksSynchronizer.DataAbstraction;
+﻿using GoogleTasksSynchronizer.BusinessLogic.Data;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,31 +13,17 @@ namespace GoogleTasksSynchronizer.BusinessLogic
     {
         private readonly ILogger<TaskChangesProcessor> _logger;
         private readonly IMasterTaskGroupBusinessManager _masterTaskGroupBusinessManager;
-
-        //private readonly IGoogleTaskAccountManager _googleTaskAccountManager;
-        //private readonly ITaskChangeCalculator _taskChangeCalculator;
-        //private readonly ITaskBusinessManager _taskBusinessManager;
-
-        private readonly ITaskServiceFactory _taskServiceFactory;
-        private readonly TelemetryClient _telemetryClient;
+        private readonly ITaskBusinessManager _taskBusinessManager;
 
         public TaskChangesProcessor(
             ILogger<TaskChangesProcessor> logger,
-            IMasterTaskGroupBusinessManager masterTaskGroupBusinessManager
-            //IGoogleTaskAccountManager googleTaskAccountManager,
-            //ITaskChangeCalculator taskChangeCalculator,
-            //ITaskBusinessManager taskBusinessManager
-            , ITaskServiceFactory taskServiceFactory
-            , TelemetryConfiguration configuration
+            IMasterTaskGroupBusinessManager masterTaskGroupBusinessManager,
+            ITaskBusinessManager taskBusinessManager
             )
         {
             _logger = logger;
             _masterTaskGroupBusinessManager = masterTaskGroupBusinessManager;
-            //_googleTaskAccountManager = googleTaskAccountManager;
-            //_taskChangeCalculator = taskChangeCalculator;
-            //_taskBusinessManager = taskBusinessManager;
-            _taskServiceFactory = taskServiceFactory;
-            _telemetryClient = new TelemetryClient(configuration);
+            _taskBusinessManager = taskBusinessManager;
         }
 
         public async Task ProcessTaskChangesAsync()
@@ -83,8 +67,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                                     if (null == matchedTask)
                                     {
-                                        var taskService = await _taskServiceFactory.CreateTaskServiceAsync(accountToCheck.SynchronizationTarget);
-
                                         var newTask = new Google::Task()
                                         {
                                             Title = masterTask.Title,
@@ -97,11 +79,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                                             //CompletedRaw = masterTask.CompletedRaw,
                                         };
 
-                                        var insertRequest = taskService.Tasks.Insert(newTask, accountToCheck.SynchronizationTarget.TaskListId);
-
-                                        matchedTask = insertRequest.Execute();
-                                        _telemetryClient.TrackEvent("GoogleAPICall");
-                                        _telemetryClient.TrackEvent("CreatedTask");
+                                        matchedTask = await _taskBusinessManager.InsertAsync(matchedTask, accountToCheck.SynchronizationTarget);
                                     }
 
                                     masterTask.TaskMaps.Add(new TaskMap()
@@ -121,14 +99,10 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                         {
                             masterTask.Hidden = task.Hidden;
 
-                            //TODO: Protect from multiple clearings in a single run because each clear clears all completed tasks
                             foreach (var accountToClear in masterTaskGroup.TaskAccountGroups)
                             {
-                                var taskService = await _taskServiceFactory.CreateTaskServiceAsync(accountToClear.SynchronizationTarget);
-
-                                taskService.Tasks.Clear(accountToClear.SynchronizationTarget.TaskListId).Execute();
-                                _telemetryClient.TrackEvent("GoogleAPICall");
-                                _telemetryClient.TrackEvent("ClearTasks");
+                                //TODO: Task may not belong to Account?
+                                await _taskBusinessManager.ClearAsync(task, accountToClear.SynchronizationTarget);
                             }
                         }
 
@@ -163,7 +137,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                                     masterTask.Deleted != matchedTask.Deleted ||
                                     masterTask.Completed != matchedTask.Completed)
                                 {
-                                    var taskService = await _taskServiceFactory.CreateTaskServiceAsync(accountToCheck.SynchronizationTarget);
 
                                     matchedTask.Title = masterTask.Title;
                                     matchedTask.Notes = masterTask.Notes;
@@ -174,11 +147,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                                     matchedTask.Completed = masterTask.Completed;
                                     //matchedTask.CompletedRaw = masterTask.CompletedRaw;
 
-                                    var updateRequest = taskService.Tasks.Update(matchedTask, accountToCheck.SynchronizationTarget.TaskListId, matchedTask.Id);
-
-                                    updateRequest.Execute();
-                                    _telemetryClient.TrackEvent("GoogleAPICall");
-                                    _telemetryClient.TrackEvent("ModifiedTask");
+                                    await _taskBusinessManager.UpdateAsync(matchedTask, accountToCheck.SynchronizationTarget);
                                 }
                             }
                         }
