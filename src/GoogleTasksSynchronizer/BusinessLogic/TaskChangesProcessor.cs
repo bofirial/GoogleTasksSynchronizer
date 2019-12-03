@@ -94,7 +94,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                 TaskMaps = new List<TaskMap>()
             };
 
-            _taskMapper.MapTask(task, masterTask);
+            _taskMapper.MapTask(masterTask, task);
 
             foreach (var accountToCheck in taskAccountGroups)
             {
@@ -105,7 +105,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                 {
                     var newTask = new Google::Task();
 
-                    _taskMapper.MapTask(masterTask, newTask);
+                    _taskMapper.MapTask(newTask, masterTask);
 
                     matchedTask = await _taskBusinessManager.InsertAsync(matchedTask, accountToCheck.SynchronizationTarget);
                 }
@@ -122,7 +122,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
         private async Task UpdateTaskAsync(Google::Task task, MasterTask masterTask, List<TaskAccountGroup> taskAccountGroups)
         {
-            _taskMapper.MapTask(task, masterTask);
+            _taskMapper.MapTask(masterTask, task);
 
             foreach (var accountToCheck in taskAccountGroups)
             {
@@ -134,7 +134,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                 if (!_taskBusinessManager.TasksAreEqual(masterTask, matchedTask))
                 {
-                    _taskMapper.MapTask(masterTask, matchedTask);
+                    _taskMapper.MapTask(matchedTask, masterTask);
 
                     await _taskBusinessManager.UpdateAsync(matchedTask, accountToCheck.SynchronizationTarget);
                 }

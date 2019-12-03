@@ -5,7 +5,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 {
     public class TaskMapper : ITaskMapper
     {
-        public void MapTask(MasterTask fromTask, Task toTask)
+        public void MapTask(Task toTask, MasterTask fromTask)
         {
             toTask.Title = fromTask.Title;
             toTask.Due = fromTask.Due;
@@ -16,7 +16,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             toTask.Hidden = fromTask.Hidden;
         }
 
-        public void MapTask(Task fromTask, MasterTask toTask)
+        public void MapTask(MasterTask toTask, Task fromTask)
         {
             toTask.Title = fromTask.Title;
             toTask.Due = fromTask.Due;
