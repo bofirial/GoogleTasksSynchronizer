@@ -1,5 +1,7 @@
 ﻿using Google.Apis.Tasks.v1.Data;
 using GoogleTasksSynchronizer.Configuration;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,10 +13,12 @@ namespace GoogleTasksSynchronizer.DataAbstraction
     public class TaskManager : ITaskManager
     {
         private readonly ITaskServiceFactory _taskServiceFactory;
+        private readonly TelemetryClient _telemetryClient;
 
-        public TaskManager(ITaskServiceFactory taskServiceFactory)
+        public TaskManager(ITaskServiceFactory taskServiceFactory, TelemetryConfiguration configuration)
         {
             _taskServiceFactory = taskServiceFactory;
+            _telemetryClient = new TelemetryClient(configuration);
         }
 
         public async Task<List<Google::Task>> SelectAllAsync(SynchronizationTarget synchronizationTarget)
@@ -38,6 +42,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
                 listRequest.PageToken = taskResult?.NextPageToken;
 
                 taskResult = listRequest.Execute();
+                _telemetryClient.TrackEvent("GoogleAPICall");
 
                 if (null != taskResult?.Items)
                 {

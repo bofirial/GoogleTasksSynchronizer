@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace GoogleTasksSynchronizer.DataAbstraction.Models
 {
@@ -10,5 +11,6 @@ namespace GoogleTasksSynchronizer.DataAbstraction.Models
         public string Status { get; set; }
         public bool Deleted { get; set; }
         public DateTime? Completed { get; set; }
+        //public List<string> TaskIds { get; set; }
     }
 }

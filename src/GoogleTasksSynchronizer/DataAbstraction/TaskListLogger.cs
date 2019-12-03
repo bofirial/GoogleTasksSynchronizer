@@ -1,4 +1,6 @@
 ﻿using GoogleTasksSynchronizer.Configuration;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
@@ -8,11 +10,13 @@ namespace GoogleTasksSynchronizer.DataAbstraction
     {
         private readonly ILogger<TaskListLogger> _logger;
         private readonly ITaskServiceFactory _taskServiceFactory;
+        private readonly TelemetryClient _telemetryClient;
 
-        public TaskListLogger(ILogger<TaskListLogger> logger, ITaskServiceFactory taskServiceFactory)
+        public TaskListLogger(ILogger<TaskListLogger> logger, ITaskServiceFactory taskServiceFactory, TelemetryConfiguration configuration)
         {
             _logger = logger;
             _taskServiceFactory = taskServiceFactory;
+            _telemetryClient = new TelemetryClient(configuration);
         }
 
         public async Task LogAllTaskListsAsync(string[] googleAccountNames)
@@ -24,6 +28,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
                 var taskListRequest = taskService.Tasklists.List();
 
                 var response = await taskListRequest.ExecuteAsync();
+                _telemetryClient.TrackEvent("GoogleAPICall");
 
                 foreach (var item in response.Items)
                 {

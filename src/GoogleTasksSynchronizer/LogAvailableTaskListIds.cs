@@ -26,7 +26,7 @@ namespace GoogleTasksSynchronizer
         {
             string[] googleAccountNames = req.Query["googleAccountName"];
 
-            if (null == googleAccountNames)
+            if (null == googleAccountNames || googleAccountNames.Length == 0)
             {
                 var synchronizationTargets = await _synchronizationTargetManager.GetAsync();
 
