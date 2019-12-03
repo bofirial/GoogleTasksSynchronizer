@@ -6,7 +6,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction.Execution
 {
     public class SingleExecutionEnforcementExecutor : ISingleExecutionEnforcementExecutor
     {
-        Dictionary<string, HashSet<string>> _executedMap = new Dictionary<string, HashSet<string>>();
+        readonly Dictionary<string, HashSet<string>> _executedMap = new Dictionary<string, HashSet<string>>();
         
         public async Task ExecuteOnceAsync(Func<string, Task> func, string param1)
         {

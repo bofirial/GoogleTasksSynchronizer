@@ -14,16 +14,19 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         private readonly ILogger<TaskChangesProcessor> _logger;
         private readonly IMasterTaskGroupBusinessManager _masterTaskGroupBusinessManager;
         private readonly ITaskBusinessManager _taskBusinessManager;
+        private readonly ITaskMapper _taskMapper;
 
         public TaskChangesProcessor(
             ILogger<TaskChangesProcessor> logger,
             IMasterTaskGroupBusinessManager masterTaskGroupBusinessManager,
-            ITaskBusinessManager taskBusinessManager
+            ITaskBusinessManager taskBusinessManager,
+            ITaskMapper taskMapper
             )
         {
             _logger = logger;
             _masterTaskGroupBusinessManager = masterTaskGroupBusinessManager;
             _taskBusinessManager = taskBusinessManager;
+            _taskMapper = taskMapper;
         }
 
         public async Task ProcessTaskChangesAsync()
@@ -44,15 +47,10 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                             {
                                 masterTask = new MasterTask()
                                 {
-                                    Title = task.Title,
-                                    Due = task.Due,
-                                    Notes = task.Notes,
-                                    Status = task.Status,
-                                    Deleted = task.Deleted,
-                                    Completed = task.Completed,
-                                    Hidden = task.Hidden,
                                     TaskMaps = new List<TaskMap>()
                                 };
+
+                                _taskMapper.MapTask(task, masterTask);
 
                                 foreach (var accountToCheck in masterTaskGroup.TaskAccountGroups)
                                 {
@@ -61,17 +59,9 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                                     if (null == matchedTask)
                                     {
-                                        var newTask = new Google::Task()
-                                        {
-                                            Title = masterTask.Title,
-                                            Notes = masterTask.Notes,
-                                            Due = masterTask.Due,
-                                            Status = masterTask.Status,
-                                            //DueRaw = masterTask.DueRaw,
-                                            Deleted = masterTask.Deleted,
-                                            Completed = masterTask.Completed,
-                                            //CompletedRaw = masterTask.CompletedRaw,
-                                        };
+                                        var newTask = new Google::Task();
+
+                                        _taskMapper.MapTask(masterTask, newTask);
 
                                         matchedTask = await _taskBusinessManager.InsertAsync(matchedTask, accountToCheck.SynchronizationTarget);
                                     }
@@ -102,12 +92,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                         if (!_taskBusinessManager.TasksAreEqual(masterTask, task))
                         {
-                            masterTask.Title = task.Title;
-                            masterTask.Due = task.Due;
-                            masterTask.Notes = task.Notes;
-                            masterTask.Status = task.Status;
-                            masterTask.Deleted = task.Deleted;
-                            masterTask.Completed = task.Completed;
+                            _taskMapper.MapTask(task, masterTask);
 
                             foreach (var accountToCheck in masterTaskGroup.TaskAccountGroups)
                             {
@@ -119,16 +104,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                                 if (!_taskBusinessManager.TasksAreEqual(masterTask, matchedTask))
                                 {
-
-                                    matchedTask.Title = masterTask.Title;
-                                    matchedTask.Notes = masterTask.Notes;
-                                    matchedTask.Due = masterTask.Due;
-                                    matchedTask.Status = masterTask.Status;
-                                    //matchedTask.DueRaw = masterTask.DueRaw;
-                                    matchedTask.Deleted = masterTask.Deleted;
-                                    matchedTask.Completed = masterTask.Completed;
-                                    //matchedTask.CompletedRaw = masterTask.CompletedRaw;
-
+                                    _taskMapper.MapTask(masterTask, matchedTask);
+                                    
                                     await _taskBusinessManager.UpdateAsync(matchedTask, accountToCheck.SynchronizationTarget);
                                 }
                             }
