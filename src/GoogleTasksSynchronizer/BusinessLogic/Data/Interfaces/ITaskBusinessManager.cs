@@ -1,4 +1,5 @@
 ﻿using GoogleTasksSynchronizer.Configuration;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,5 +16,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
         Task UpdateAsync(Google::Task task, SynchronizationTarget synchronizationTarget);
 
         Task ClearAsync(Google::Task task, SynchronizationTarget synchronizationTarget);
+
+        bool TasksAreEqual(MasterTask masterTask, Google::Task task);
     }
 }

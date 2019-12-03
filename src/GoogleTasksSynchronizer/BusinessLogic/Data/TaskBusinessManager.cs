@@ -1,5 +1,6 @@
 ﻿using GoogleTasksSynchronizer.Configuration;
 using GoogleTasksSynchronizer.DataAbstraction;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -36,6 +37,17 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
         public async Task ClearAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
         {
             await _taskManager.ClearAsync(task, synchronizationTarget);
+        }
+
+        public bool TasksAreEqual(MasterTask masterTask, Google::Task task)
+        {
+            return masterTask.Title == task.Title &&
+                    masterTask.Due == task.Due &&
+                    masterTask.Notes == task.Notes &&
+                    masterTask.Status == task.Status &&
+                    masterTask.Deleted == task.Deleted &&
+                    masterTask.Completed == task.Completed &&
+                    masterTask.Hidden == task.Hidden;
         }
     }
 }

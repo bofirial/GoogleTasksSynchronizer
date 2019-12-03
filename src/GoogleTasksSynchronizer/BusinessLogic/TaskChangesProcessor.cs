@@ -57,13 +57,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                                 foreach (var accountToCheck in masterTaskGroup.TaskAccountGroups)
                                 {
                                     //CONSIDER: Duplicate Tasks are hidden here
-                                    var matchedTask = accountToCheck.Tasks.Where(t => masterTask.Title == t.Title &&
-                                                                                masterTask.Due == t.Due &&
-                                                                                masterTask.Notes == t.Notes &&
-                                                                                masterTask.Status == t.Status &&
-                                                                                masterTask.Deleted == t.Deleted &&
-                                                                                masterTask.Completed == t.Completed &&
-                                                                                masterTask.Hidden == t.Hidden).FirstOrDefault();
+                                    var matchedTask = accountToCheck.Tasks.Where(t => _taskBusinessManager.TasksAreEqual(masterTask, t)).FirstOrDefault();
 
                                     if (null == matchedTask)
                                     {
@@ -106,13 +100,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                             }
                         }
 
-                        if (masterTask.Title != task.Title ||
-                            masterTask.Due != task.Due ||
-                            masterTask.Notes != task.Notes ||
-                            masterTask.Status != task.Status ||
-
-                            masterTask.Deleted != task.Deleted ||
-                            masterTask.Completed != task.Completed)
+                        if (!_taskBusinessManager.TasksAreEqual(masterTask, task))
                         {
                             masterTask.Title = task.Title;
                             masterTask.Due = task.Due;
@@ -129,13 +117,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                                 var matchedTask = accountToCheck.Tasks.Where(t => t.Id == targetTaskId).FirstOrDefault();
 
-                                if (masterTask.Title != matchedTask.Title ||
-                                    masterTask.Due != matchedTask.Due ||
-                                    masterTask.Notes != matchedTask.Notes ||
-                                    masterTask.Status != matchedTask.Status ||
-
-                                    masterTask.Deleted != matchedTask.Deleted ||
-                                    masterTask.Completed != matchedTask.Completed)
+                                if (!_taskBusinessManager.TasksAreEqual(masterTask, matchedTask))
                                 {
 
                                     matchedTask.Title = masterTask.Title;
