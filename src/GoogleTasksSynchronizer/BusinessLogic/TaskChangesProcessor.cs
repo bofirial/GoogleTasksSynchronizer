@@ -59,7 +59,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             foreach (var taskAccountGroup in masterTaskGroup.TaskAccountGroups)
             {
                 _logger.LogInformation($"{masterTaskGroup.MasterTasks.Count} tasks to process for " +
-                    $"Google Account ({taskAccountGroup.SynchronizationTarget}) and SyncronizationId ({masterTaskGroup.SynchronizationId})");
+                    $"Google Account ({taskAccountGroup.SynchronizationTarget.GoogleAccountName}) and SyncronizationId ({masterTaskGroup.SynchronizationId})");
 
                 var tasks = new List<Task>();
 
