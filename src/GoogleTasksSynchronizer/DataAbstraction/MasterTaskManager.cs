@@ -18,6 +18,8 @@ namespace GoogleTasksSynchronizer.DataAbstraction
         {
             var tasksDictionary = (await _applicationStateManager.SelectAsync()).Tasks;
 
+            //TODO: What if the dictionary doesn't exist yet?
+
             return tasksDictionary[synchronizationId];
         }
 
