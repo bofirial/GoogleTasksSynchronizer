@@ -1,18 +1,22 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.Extensions.Options;
 
 namespace GoogleTasksSynchronizer.Configuration
 {
     public class GoogleClientSecretProvider : IGoogleClientSecretProvider
     {
+        private readonly IOptions<GoogleClientSecretOptions> _googleClientSecretOptions;
+
+        public GoogleClientSecretProvider(IOptions<GoogleClientSecretOptions> googleClientSecretOptions)
+        {
+            _googleClientSecretOptions = googleClientSecretOptions;
+        }
+
         public ClientSecrets GetGoogleClientSecrets()
         {
-            //TODO: Consider switching this to use Configuration
-            var googleClientSecretJson = Environment.GetEnvironmentVariable("GoogleClientSecret");
-
-            using var memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(googleClientSecretJson));
+            using var memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(_googleClientSecretOptions.Value.GoogleClientSecret));
 
             return GoogleClientSecrets.Load(memoryStream).Secrets;
         }

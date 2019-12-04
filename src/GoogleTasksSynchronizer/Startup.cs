@@ -27,6 +27,9 @@ namespace GoogleTasksSynchronizer
 
             builder.Services.AddOptions<SynchronizationTargetsOptions>()
                 .Configure<IConfiguration>((settings, configuration) => { configuration.Bind(settings); });
+            builder.Services.AddOptions<GoogleClientSecretOptions>()
+                .Configure<IConfiguration>((settings, configuration) => { configuration.Bind(settings); });
+            
             builder.Services.AddScoped<ISynchronizationTargetsProvider, SynchronizationTargetsProvider>();
             builder.Services.AddScoped<IMasterTaskBusinessManager, MasterTaskBusinessManager>();
             builder.Services.AddScoped<IMasterTaskManager, MasterTaskManager>();
