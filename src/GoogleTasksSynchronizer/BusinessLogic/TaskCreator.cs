@@ -52,7 +52,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                     _taskMapper.MapTask(newTask, masterTask);
 
-                    task = await _taskBusinessManager.InsertAsync(task, taskAccountGroup.SynchronizationTarget);
+                    task = await _taskBusinessManager.InsertAsync(newTask, taskAccountGroup.SynchronizationTarget);
                 }
 
                 masterTask.TaskMaps.Add(new TaskMap()
