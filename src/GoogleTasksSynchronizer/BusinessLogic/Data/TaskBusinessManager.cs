@@ -1,10 +1,9 @@
-﻿using GoogleTasksSynchronizer.Configuration;
-using GoogleTasksSynchronizer.DataAbstraction;
-using GoogleTasksSynchronizer.DataAbstraction.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
+using GoogleTasksSynchronizer.Configuration;
+using GoogleTasksSynchronizer.DataAbstraction;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
 using Google = Google.Apis.Tasks.v1.Data;
 
 namespace GoogleTasksSynchronizer.BusinessLogic.Data

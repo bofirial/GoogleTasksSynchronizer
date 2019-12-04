@@ -1,6 +1,6 @@
-﻿using GoogleTasksSynchronizer.DataAbstraction.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
 {

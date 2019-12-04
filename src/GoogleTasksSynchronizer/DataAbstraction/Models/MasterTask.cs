@@ -9,7 +9,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction.Models
         public List<TaskMap> TaskMaps { get; set; }
         public DateTime UpdatedOn { get; set; }
 
-        public string Title  { get; set; }
+        public string Title { get; set; }
         public DateTime? Due { get; set; }
         public string Notes { get; set; }
         public string Status { get; set; }

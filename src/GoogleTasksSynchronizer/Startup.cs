@@ -1,11 +1,11 @@
-﻿using GoogleTasksSynchronizer.BusinessLogic;
+using System;
+using GoogleTasksSynchronizer.BusinessLogic;
 using GoogleTasksSynchronizer.BusinessLogic.Data;
 using GoogleTasksSynchronizer.Configuration;
 using GoogleTasksSynchronizer.DataAbstraction;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 [assembly: FunctionsStartup(typeof(GoogleTasksSynchronizer.Startup))]
 
@@ -26,10 +26,10 @@ namespace GoogleTasksSynchronizer
             builder.Services.AddScoped<IMasterTaskGroupBusinessManager, MasterTaskGroupBusinessManager>();
 
             builder.Services.AddOptions<SynchronizationTargetsOptions>()
-                .Configure<IConfiguration>((settings, configuration) => { configuration.Bind(settings); });
+                .Configure<IConfiguration>((settings, configuration) => configuration.Bind(settings));
             builder.Services.AddOptions<GoogleClientSecretOptions>()
-                .Configure<IConfiguration>((settings, configuration) => { configuration.Bind(settings); });
-            
+                .Configure<IConfiguration>((settings, configuration) => configuration.Bind(settings));
+
             builder.Services.AddScoped<ISynchronizationTargetsProvider, SynchronizationTargetsProvider>();
             builder.Services.AddScoped<IMasterTaskBusinessManager, MasterTaskBusinessManager>();
             builder.Services.AddScoped<IMasterTaskManager, MasterTaskManager>();

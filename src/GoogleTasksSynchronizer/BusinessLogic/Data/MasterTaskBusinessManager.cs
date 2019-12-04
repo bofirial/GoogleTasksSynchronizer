@@ -1,8 +1,8 @@
-﻿using GoogleTasksSynchronizer.DataAbstraction;
-using GoogleTasksSynchronizer.DataAbstraction.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GoogleTasksSynchronizer.DataAbstraction;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
 
 namespace GoogleTasksSynchronizer.BusinessLogic.Data
 {

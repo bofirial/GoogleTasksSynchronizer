@@ -1,6 +1,6 @@
-﻿using Google.Apis.Tasks.v1;
+﻿using System.Threading.Tasks;
+using Google.Apis.Tasks.v1;
 using GoogleTasksSynchronizer.Configuration;
-using System.Threading.Tasks;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
 {

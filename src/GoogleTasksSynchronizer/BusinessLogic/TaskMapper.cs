@@ -1,6 +1,6 @@
-﻿using Google.Apis.Tasks.v1.Data;
+﻿using System;
+using Google.Apis.Tasks.v1.Data;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
-using System;
 
 namespace GoogleTasksSynchronizer.BusinessLogic
 {

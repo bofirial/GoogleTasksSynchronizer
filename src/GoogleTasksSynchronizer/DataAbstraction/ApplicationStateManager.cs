@@ -1,26 +1,17 @@
-﻿using GoogleTasksSynchronizer.DataAbstraction.Models;
-using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Threading.Tasks;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
 {
     public class ApplicationStateManager : IApplicationStateManager
     {
-        private readonly ILogger<ApplicationStateManager> _logger;
-
         private CloudBlockBlob _applicationStateBlob;
         private ApplicationState _applicationState;
 
         private bool _initialized = false;
-
-        public ApplicationStateManager(ILogger<ApplicationStateManager> logger)
-        {
-            _logger = logger;
-        }
 
         public Task InitializeFromBindingAsync(CloudBlockBlob applicationStateBlob)
         {

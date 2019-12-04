@@ -1,10 +1,10 @@
 using System;
+using System.Threading.Tasks;
 using GoogleTasksSynchronizer.BusinessLogic;
 using GoogleTasksSynchronizer.DataAbstraction;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Blob;
-using System.Threading.Tasks;
 
 namespace GoogleTasksSynchronizer
 {
@@ -15,7 +15,7 @@ namespace GoogleTasksSynchronizer
         private readonly ITaskChangesProcessor _taskChangesProcessor;
 
         public ProcessGoogleTaskChanges(
-            ILogger<ProcessGoogleTaskChanges> logger, 
+            ILogger<ProcessGoogleTaskChanges> logger,
             IApplicationStateManager applicationStateManager,
             ITaskChangesProcessor taskChangesProcessor)
         {
@@ -26,7 +26,7 @@ namespace GoogleTasksSynchronizer
 
         [FunctionName("ProcessGoogleTaskChanges")]
         public async Task Run(
-            [TimerTrigger("*/15 * 6-23 * * *", RunOnStartup = true)]TimerInfo myTimer, 
+            [TimerTrigger("*/15 * 6-23 * * *", RunOnStartup = true)]TimerInfo myTimer,
             [Blob("jschaferfunctions/tasksSynchronizerStateBlob.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob tasksSynchronizerStateBlob)
         {
             myTimer = myTimer ?? throw new ArgumentNullException(nameof(myTimer));

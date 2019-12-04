@@ -1,6 +1,6 @@
-﻿using GoogleTasksSynchronizer.DataAbstraction.Models;
+﻿using System.Threading.Tasks;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
 using Newtonsoft.Json;
-using System.Threading.Tasks;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
 {

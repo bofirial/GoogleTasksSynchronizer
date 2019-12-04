@@ -1,11 +1,10 @@
-﻿using GoogleTasksSynchronizer.Configuration;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
-
+using GoogleTasksSynchronizer.Configuration;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 using Google = Google.Apis.Tasks.v1.Data;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
@@ -16,7 +15,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
         private readonly TelemetryClient _telemetryClient;
 
         public TaskManager(
-            ITaskServiceFactory taskServiceFactory, 
+            ITaskServiceFactory taskServiceFactory,
             TelemetryConfiguration configuration)
         {
             _taskServiceFactory = taskServiceFactory;
@@ -45,7 +44,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             {
                 listRequest.PageToken = taskResult?.NextPageToken;
 
-                _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() { 
+                _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() {
                     { "ApiMethod", "GetTasks" },
                     { "GoogleAccountName", synchronizationTarget.GoogleAccountName },
                     { "SynchronizationId", synchronizationTarget.SynchronizationId }
@@ -72,7 +71,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             var insertRequest = taskService.Tasks.Insert(task, synchronizationTarget.TaskListId);
 
-            _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() { 
+            _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() {
                 { "ApiMethod", "CreatedTask" },
                 { "GoogleAccountName", synchronizationTarget.GoogleAccountName },
                 { "SynchronizationId", synchronizationTarget.SynchronizationId },
@@ -91,7 +90,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             var updateRequest = taskService.Tasks.Update(task, synchronizationTarget.TaskListId, task.Id);
 
-            _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() { 
+            _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() {
                 { "ApiMethod", "ModifiedTask" },
                 { "GoogleAccountName", synchronizationTarget.GoogleAccountName },
                 { "SynchronizationId", synchronizationTarget.SynchronizationId },

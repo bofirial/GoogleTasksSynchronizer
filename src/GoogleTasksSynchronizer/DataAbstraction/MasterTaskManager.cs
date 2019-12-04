@@ -1,10 +1,10 @@
-﻿using GoogleTasksSynchronizer.DataAbstraction.Models;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
 {

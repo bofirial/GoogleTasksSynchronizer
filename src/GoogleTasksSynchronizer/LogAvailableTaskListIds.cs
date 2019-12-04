@@ -1,12 +1,12 @@
+using System;
+using System.Linq;
 using System.Threading.Tasks;
+using GoogleTasksSynchronizer.Configuration;
+using GoogleTasksSynchronizer.DataAbstraction;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using GoogleTasksSynchronizer.DataAbstraction;
-using GoogleTasksSynchronizer.Configuration;
-using System.Linq;
-using System;
 
 namespace GoogleTasksSynchronizer
 {

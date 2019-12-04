@@ -1,10 +1,10 @@
-﻿using Google.Apis.Auth.OAuth2;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Tasks.v1;
 using GoogleTasksSynchronizer.Configuration;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
 {

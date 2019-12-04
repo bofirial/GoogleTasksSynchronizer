@@ -1,9 +1,9 @@
-﻿using GoogleTasksSynchronizer.BusinessLogic.Data;
-using GoogleTasksSynchronizer.Configuration;
-using GoogleTasksSynchronizer.DataAbstraction.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GoogleTasksSynchronizer.BusinessLogic.Data;
+using GoogleTasksSynchronizer.Configuration;
+using GoogleTasksSynchronizer.DataAbstraction.Models;
 
 namespace GoogleTasksSynchronizer.BusinessLogic
 {
