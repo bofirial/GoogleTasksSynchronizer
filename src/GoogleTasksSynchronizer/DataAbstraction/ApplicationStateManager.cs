@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
@@ -36,18 +37,9 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             if (_applicationState == null)
             {
-                try
-                {
-                    var rawData = await _applicationStateBlob.DownloadTextAsync();
+                var rawData = await _applicationStateBlob.DownloadTextAsync();
 
-                    return JsonConvert.DeserializeObject<ApplicationState>(rawData);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogWarning($"Failed to obtain the ApplicationState.  Exception Details: {e.Message}");
-
-                    _applicationState = new ApplicationState();
-                }
+                return JsonConvert.DeserializeObject<ApplicationState>(rawData);
             }
 
             return _applicationState;
