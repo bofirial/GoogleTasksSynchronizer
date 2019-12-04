@@ -6,8 +6,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 {
     public interface ITaskMapper
     {
-        void MapTask(MasterTask fromTask, Google::Task toTask);
+        void MapTask(Google::Task toTask, MasterTask fromTask);
 
-        void MapTask(Google::Task fromTask, MasterTask toTask);
+        void MapTask(MasterTask toTask, Google::Task fromTask);
     }
 }

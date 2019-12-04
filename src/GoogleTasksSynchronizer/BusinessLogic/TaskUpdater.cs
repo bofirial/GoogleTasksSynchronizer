@@ -1,5 +1,6 @@
 ﻿using GoogleTasksSynchronizer.BusinessLogic.Data;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,13 @@ namespace GoogleTasksSynchronizer.BusinessLogic
     {
         private readonly ITaskMapper _taskMapper;
         private readonly ITaskBusinessManager _taskBusinessManager;
+        private readonly ILogger<TaskUpdater> _logger;
 
-        public TaskUpdater(ITaskMapper taskMapper, ITaskBusinessManager taskBusinessManager)
+        public TaskUpdater(ITaskMapper taskMapper, ITaskBusinessManager taskBusinessManager, ILogger<TaskUpdater> logger)
         {
             _taskMapper = taskMapper;
             _taskBusinessManager = taskBusinessManager;
+            _logger = logger;
         }
 
         public async Task UpdateTaskAsync(Google::Task task, MasterTask masterTask, List<TaskAccountGroup> taskAccountGroups)
@@ -28,20 +31,28 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             _taskMapper.MapTask(masterTask, task);
             masterTask.UpdatedOn = DateTime.Now;
 
-            foreach (var accountToCheck in taskAccountGroups)
+            foreach (var taskAccountGroup in taskAccountGroups)
             {
-                //TODO: Handle Missing TaskMaps?
-                var targetTaskId = masterTask.TaskMaps.FirstOrDefault(tm =>
-                    tm.SynchronizationTarget.GoogleAccountName == accountToCheck.SynchronizationTarget.GoogleAccountName)?.TaskId;
+                await UpdateTaskAccountGroupTaskAsync(masterTask, taskAccountGroup);
+            }
+        }
 
-                var matchedTask = accountToCheck.Tasks.Where(t => t.Id == targetTaskId).FirstOrDefault();
+        private async Task UpdateTaskAccountGroupTaskAsync(MasterTask masterTask, TaskAccountGroup taskAccountGroup)
+        {
+            var taskToUpdateId = masterTask.TaskMaps.FirstOrDefault(tm =>
+                tm.SynchronizationTarget.GoogleAccountName == taskAccountGroup.SynchronizationTarget.GoogleAccountName)?.TaskId;
 
-                if (!_taskBusinessManager.TasksAreEqual(masterTask, matchedTask))
-                {
-                    _taskMapper.MapTask(matchedTask, masterTask);
+            var taskToUpdate = taskAccountGroup.Tasks.Where(t => t.Id == taskToUpdateId).FirstOrDefault();
 
-                    await _taskBusinessManager.UpdateAsync(matchedTask, accountToCheck.SynchronizationTarget);
-                }
+            if (null == taskToUpdate)
+            {
+                _logger.LogError($"Missing Task Mapping for Task: \"{masterTask.Title}\"");
+            }
+            else if (!_taskBusinessManager.TasksAreEqual(masterTask, taskToUpdate))
+            {
+                _taskMapper.MapTask(taskToUpdate, masterTask);
+
+                await _taskBusinessManager.UpdateAsync(taskToUpdate, taskAccountGroup.SynchronizationTarget);
             }
         }
     }
