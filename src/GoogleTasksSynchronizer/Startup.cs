@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GoogleTasksSynchronizer.BusinessLogic;
 using GoogleTasksSynchronizer.BusinessLogic.Data;
 using GoogleTasksSynchronizer.Configuration;
