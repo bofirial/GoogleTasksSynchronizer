@@ -1,5 +1,4 @@
-﻿using GoogleTasksSynchronizer.Configuration;
-using GoogleTasksSynchronizer.DataAbstraction;
+﻿using GoogleTasksSynchronizer.DataAbstraction;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
 using System;
 using System.Collections.Generic;
