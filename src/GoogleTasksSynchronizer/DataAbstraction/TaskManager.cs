@@ -45,8 +45,12 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             {
                 listRequest.PageToken = taskResult?.NextPageToken;
 
-                _telemetryClient.TrackEvent("GoogleAPICall");
-                _telemetryClient.TrackEvent("GetTasks");
+                _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() { 
+                    { "ApiMethod", "GetTasks" },
+                    { "GoogleAccountName", synchronizationTarget.GoogleAccountName },
+                    { "SynchronizationId", synchronizationTarget.SynchronizationId }
+                });
+
                 taskResult = await listRequest.ExecuteAsync();
 
                 if (null != taskResult?.Items)
@@ -61,14 +65,20 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
         public async Task<Google::Task> InsertAsync(Google::Task task, SynchronizationTarget synchronizationTarget)
         {
+            task = task ?? throw new ArgumentNullException(nameof(task));
             synchronizationTarget = synchronizationTarget ?? throw new ArgumentNullException(nameof(synchronizationTarget));
 
             var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
 
             var insertRequest = taskService.Tasks.Insert(task, synchronizationTarget.TaskListId);
 
-            _telemetryClient.TrackEvent("GoogleAPICall");
-            _telemetryClient.TrackEvent("CreatedTask");
+            _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() { 
+                { "ApiMethod", "CreatedTask" },
+                { "GoogleAccountName", synchronizationTarget.GoogleAccountName },
+                { "SynchronizationId", synchronizationTarget.SynchronizationId },
+                { "Task.Title", task.Title }
+            });
+
             return await insertRequest.ExecuteAsync();
         }
 
@@ -81,8 +91,13 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             var updateRequest = taskService.Tasks.Update(task, synchronizationTarget.TaskListId, task.Id);
 
-            _telemetryClient.TrackEvent("GoogleAPICall");
-            _telemetryClient.TrackEvent("ModifiedTask");
+            _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() { 
+                { "ApiMethod", "ModifiedTask" },
+                { "GoogleAccountName", synchronizationTarget.GoogleAccountName },
+                { "SynchronizationId", synchronizationTarget.SynchronizationId },
+                { "Task.Title", task.Title }
+            });
+
             await updateRequest.ExecuteAsync();
         }
     }

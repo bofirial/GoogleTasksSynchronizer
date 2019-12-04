@@ -3,6 +3,7 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
@@ -30,8 +31,11 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
                 var taskListRequest = taskService.Tasklists.List();
 
-                _telemetryClient.TrackEvent("GoogleAPICall");
-                _telemetryClient.TrackEvent("GetTaskLists");
+                _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() { 
+                    { "ApiMethod", "GetTaskLists" }, 
+                    { "GoogleAccount", googleAccountName } 
+                });
+
                 var response = await taskListRequest.ExecuteAsync();
 
                 foreach (var item in response.Items)
