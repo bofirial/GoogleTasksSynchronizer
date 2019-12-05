@@ -26,7 +26,7 @@ namespace GoogleTasksSynchronizer
 
         [FunctionName("ProcessGoogleTaskChanges")]
         public async Task Run(
-            [TimerTrigger("*/15 * 8 * * *", RunOnStartup = true)]TimerInfo myTimer,
+            [TimerTrigger("*/15 * 8-23 * * *", RunOnStartup = true)]TimerInfo myTimer,
             [Blob("jschaferfunctions/tasksSynchronizerStateBlob.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob tasksSynchronizerStateBlob)
         {
             myTimer = myTimer ?? throw new ArgumentNullException(nameof(myTimer));
