@@ -34,7 +34,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
             listRequest.ShowDeleted = true;
             listRequest.ShowHidden = true;
 
-            listRequest.UpdatedMin = DateTime.Today.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture);
+            listRequest.UpdatedMin = DateTime.Today.AddDays(-1).ToString("yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture);
 
             var tasks = new List<Google::Task>();
 
