@@ -63,7 +63,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                 var tasks = new List<Task>();
 
-                foreach (var task in taskAccountGroup.Tasks)
+                foreach (var task in taskAccountGroup.Tasks.Where(_taskBusinessManager.ShouldSynchronizeTask))
                 {
                     tasks.Add(ProcessTaskChangeAsync(masterTaskGroup, task));
                 }

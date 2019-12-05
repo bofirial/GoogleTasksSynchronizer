@@ -12,9 +12,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
     {
         private readonly ITaskManager _taskManager;
 
-        public TaskBusinessManager(
-            ITaskManager taskManager
-            )
+        public TaskBusinessManager(ITaskManager taskManager)
         {
             _taskManager = taskManager;
         }
@@ -45,6 +43,13 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
                     masterTask.Status == task.Status &&
                     masterTask.Deleted == task.Deleted &&
                     masterTask.Completed == task.Completed;
+        }
+
+        public bool ShouldSynchronizeTask(Google::Task task)
+        {
+            task = task ?? throw new ArgumentNullException(nameof(task));
+
+            return !string.IsNullOrWhiteSpace(task.Title);
         }
     }
 }
