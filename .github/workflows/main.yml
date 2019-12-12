@@ -1,0 +1,45 @@
+name: build-deploy
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Fetch tags and master for GitVersion
+      run: |
+          git config remote.origin.url https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git fetch --tags
+          git branch --create-reflog master origin/master
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.100
+
+    - name: Setup GitVersion
+      uses: gittools/actions/setup-gitversion@v0.3.1
+      with:
+          versionSpec: '5.1.x'
+
+    - name: Use GitVersion
+      id: gitversion
+      uses: gittools/actions/execute-gitversion@v0.3.1
+
+    - name: DotNet Build
+      run: dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
+
+    - name: DotNet Publish
+      if: github.ref == 'refs/heads/master'
+      run: dotnet publish ./src/GoogleTasksSynchronizer/GoogleTasksSynchronizer.csproj -c Release -o publish --no-build /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
+
+    - uses: Azure/functions-action@v1
+      if: github.ref == 'refs/heads/master'
+      with:
+        app-name: GoogleTaskSynchronizer
+        package: publish
+        publish-profile: ${{ secrets.SCM_CREDENTIALS }}
