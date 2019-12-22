@@ -12,5 +12,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
         Task<Google::Task> InsertAsync(Google::Task task, SynchronizationTarget synchronizationTarget);
 
         Task UpdateAsync(Google::Task task, SynchronizationTarget synchronizationTarget);
+
+        Task MoveAsync(Google::Task task, SynchronizationTarget synchronizationTarget, string previousTaskId);
     }
 }

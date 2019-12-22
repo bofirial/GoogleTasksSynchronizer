@@ -49,6 +49,8 @@ namespace GoogleTasksSynchronizer
             builder.Services.AddScoped<ITaskMapper, TaskMapper>();
 
             builder.Services.AddScoped<ITaskListLogger, TaskListLogger>();
+
+            builder.Services.AddScoped<ITaskSorter, TaskSorter>();
         }
     }
 }

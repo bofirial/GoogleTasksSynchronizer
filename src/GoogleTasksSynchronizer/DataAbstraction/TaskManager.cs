@@ -98,5 +98,26 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             await updateRequest.ExecuteAsync();
         }
+
+        public async Task MoveAsync(Google::Task task, SynchronizationTarget synchronizationTarget, string previousTaskId)
+        {
+            task = task ?? throw new ArgumentNullException(nameof(task));
+            synchronizationTarget = synchronizationTarget ?? throw new ArgumentNullException(nameof(synchronizationTarget));
+
+            var taskService = await _taskServiceFactory.CreateTaskServiceAsync(synchronizationTarget);
+
+            var moveRequest = taskService.Tasks.Move(synchronizationTarget.TaskListId, task.Id);
+
+            moveRequest.Previous = previousTaskId;
+
+            _telemetryClient.TrackEvent("GoogleAPICall", new Dictionary<string, string>() {
+                { "ApiMethod", "MoveTask" },
+                { "GoogleAccountName", synchronizationTarget.GoogleAccountName },
+                { "SynchronizationId", synchronizationTarget.SynchronizationId },
+                { "Task.Title", task.Title }
+            });
+
+            await moveRequest.ExecuteAsync();
+        }
     }
 }

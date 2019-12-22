@@ -17,7 +17,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         private readonly IDeletedTasksProcessor _deletedTasksProcessor;
         private readonly ITaskCreator _taskCreator;
         private readonly ITaskUpdater _taskUpdater;
-
+        private readonly ITaskSorter _taskSorter;
         private readonly HashSet<string> _updatedMasterTasks = new HashSet<string>();
 
         public TaskChangesProcessor(
@@ -27,7 +27,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             IMasterTaskBusinessManager masterTaskBusinessManager,
             IDeletedTasksProcessor deletedTasksProcessor,
             ITaskCreator taskCreator,
-            ITaskUpdater taskUpdater
+            ITaskUpdater taskUpdater,
+            ITaskSorter taskSorter
             )
         {
             _logger = logger;
@@ -37,6 +38,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             _deletedTasksProcessor = deletedTasksProcessor;
             _taskCreator = taskCreator;
             _taskUpdater = taskUpdater;
+            _taskSorter = taskSorter;
         }
 
         public async Task ProcessTaskChangesAsync()
@@ -75,6 +77,11 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                 }
 
                 await Task.WhenAll(tasks);
+            }
+
+            foreach (var taskAccountGroup in masterTaskGroup.TaskAccountGroups)
+            {
+                await _taskSorter.SortTasksAsync(taskAccountGroup);
             }
 
             await _masterTaskBusinessManager.UpdateAsync(masterTaskGroup.SynchronizationId, masterTaskGroup.MasterTasks);

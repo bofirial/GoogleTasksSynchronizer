@@ -51,5 +51,10 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
 
             return !string.IsNullOrWhiteSpace(task.Title);
         }
+
+        public async Task MoveAsync(Google::Task task, SynchronizationTarget synchronizationTarget, string previousTaskId)
+        {
+            await _taskManager.MoveAsync(task, synchronizationTarget, previousTaskId);
+        }
     }
 }
