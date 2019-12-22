@@ -22,6 +22,7 @@ namespace GoogleTasksSynchronizer
             builder.Services.AddSingleton<IApplicationStateManager, ApplicationStateManager>();
 
             builder.Services.AddScoped<ITaskChangesProcessor, TaskChangesProcessor>();
+            builder.Services.AddScoped<IDeletedTasksProcessor, DeletedTasksProcessor>();
 
             builder.Services.AddScoped<IMasterTaskGroupBusinessManager, MasterTaskGroupBusinessManager>();
 
@@ -43,6 +44,7 @@ namespace GoogleTasksSynchronizer
 
             builder.Services.AddScoped<ITaskCreator, TaskCreator>();
             builder.Services.AddScoped<ITaskUpdater, TaskUpdater>();
+            builder.Services.AddScoped<ITaskDeleter, TaskDeleter>();
 
             builder.Services.AddScoped<ITaskMapper, TaskMapper>();
 

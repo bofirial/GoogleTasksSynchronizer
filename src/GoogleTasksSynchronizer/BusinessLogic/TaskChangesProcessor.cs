@@ -14,6 +14,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         private readonly IMasterTaskGroupBusinessManager _masterTaskGroupBusinessManager;
         private readonly ITaskBusinessManager _taskBusinessManager;
         private readonly IMasterTaskBusinessManager _masterTaskBusinessManager;
+        private readonly IDeletedTasksProcessor _deletedTasksProcessor;
         private readonly ITaskCreator _taskCreator;
         private readonly ITaskUpdater _taskUpdater;
 
@@ -24,6 +25,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             IMasterTaskGroupBusinessManager masterTaskGroupBusinessManager,
             ITaskBusinessManager taskBusinessManager,
             IMasterTaskBusinessManager masterTaskBusinessManager,
+            IDeletedTasksProcessor deletedTasksProcessor,
             ITaskCreator taskCreator,
             ITaskUpdater taskUpdater
             )
@@ -32,6 +34,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             _masterTaskGroupBusinessManager = masterTaskGroupBusinessManager;
             _taskBusinessManager = taskBusinessManager;
             _masterTaskBusinessManager = masterTaskBusinessManager;
+            _deletedTasksProcessor = deletedTasksProcessor;
             _taskCreator = taskCreator;
             _taskUpdater = taskUpdater;
         }
@@ -56,11 +59,14 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         {
             _logger.LogInformation($"{masterTaskGroup.MasterTasks.Count} master tasks stored for: {masterTaskGroup.SynchronizationId}");
 
+            masterTaskGroup.TaskAccountGroups.ForEach(taskAccountGroup =>
+                _logger.LogInformation($"{taskAccountGroup.Tasks.Count} tasks to process for " +
+                    $"Google Account ({taskAccountGroup.SynchronizationTarget.GoogleAccountName}) and SyncronizationId ({masterTaskGroup.SynchronizationId})"));
+
+            await _deletedTasksProcessor.ProcessDeletedTasksAsync(masterTaskGroup);
+
             foreach (var taskAccountGroup in masterTaskGroup.TaskAccountGroups)
             {
-                _logger.LogInformation($"{taskAccountGroup.Tasks.Count} tasks to process for " +
-                    $"Google Account ({taskAccountGroup.SynchronizationTarget.GoogleAccountName}) and SyncronizationId ({masterTaskGroup.SynchronizationId})");
-
                 var tasks = new List<Task>();
 
                 foreach (var task in taskAccountGroup.Tasks.Where(_taskBusinessManager.ShouldSynchronizeTask))

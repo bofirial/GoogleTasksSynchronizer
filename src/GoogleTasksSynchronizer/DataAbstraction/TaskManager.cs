@@ -30,11 +30,10 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             var listRequest = taskService.Tasks.List(synchronizationTarget.TaskListId);
 
-            listRequest.ShowCompleted = true;
-            listRequest.ShowDeleted = true;
-            listRequest.ShowHidden = true;
+            listRequest.MaxResults = 100;
 
-            listRequest.UpdatedMin = DateTime.Today.AddDays(-1).ToString("yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture);
+            listRequest.ShowCompleted = true;
+            listRequest.ShowHidden = true;
 
             var tasks = new List<Google::Task>();
 
