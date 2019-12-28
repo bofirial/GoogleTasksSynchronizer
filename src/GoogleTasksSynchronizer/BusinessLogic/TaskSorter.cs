@@ -27,10 +27,11 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                 return;
             }
 
-            var orderedTasks = taskAccountGroup.Tasks.OrderBy(t => t.GetOrderKey());
+            var orderedTasks = taskAccountGroup.Tasks.Where(t => t.Completed == null).OrderBy(t => t.GetOrderKey());
 
             string previousTaskId = null;
             string previousOrderKey = null;
+            var previousTaskTitle = string.Empty;
             var previousPosition = string.Empty;
 
             foreach (var task in orderedTasks)
@@ -45,6 +46,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                 previousTaskId = task.Id;
                 previousOrderKey = task.GetOrderKey();
                 previousPosition = task.Position;
+                previousTaskTitle = task.Title;
             }
         }
     }
