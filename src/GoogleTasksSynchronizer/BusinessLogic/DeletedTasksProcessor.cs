@@ -22,7 +22,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             _taskDeleter = taskDeleter;
         }
 
-        public async Task ProcessDeletedTasksAsync(MasterTaskGroup masterTaskGroup)
+        public async Task<bool> ProcessDeletedTasksAsync(MasterTaskGroup masterTaskGroup)
         {
             masterTaskGroup = masterTaskGroup ?? throw new ArgumentNullException(nameof(masterTaskGroup));
 
@@ -54,6 +54,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 
                 masterTaskGroup.MasterTasks.RemoveAll(m => m.MasterTaskId == deletedTaskId);
             }
+
+            return deletedTaskIds.Any();
         }
     }
 }

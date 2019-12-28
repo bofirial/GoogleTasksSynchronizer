@@ -5,6 +5,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 {
     public interface IDeletedTasksProcessor
     {
-        Task ProcessDeletedTasksAsync(MasterTaskGroup masterTaskGroup);
+        Task<bool> ProcessDeletedTasksAsync(MasterTaskGroup masterTaskGroup);
     }
 }

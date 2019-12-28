@@ -65,29 +65,36 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                 _logger.LogInformation($"{taskAccountGroup.Tasks.Count} tasks to process for " +
                     $"Google Account ({taskAccountGroup.SynchronizationTarget.GoogleAccountName}) and SyncronizationId ({masterTaskGroup.SynchronizationId})"));
 
-            await _deletedTasksProcessor.ProcessDeletedTasksAsync(masterTaskGroup);
+            var anyChanges = false;
+            
+            anyChanges |= await _deletedTasksProcessor.ProcessDeletedTasksAsync(masterTaskGroup);
 
             foreach (var taskAccountGroup in masterTaskGroup.TaskAccountGroups)
             {
-                var tasks = new List<Task>();
+                var tasks = new List<Task<bool>>();
 
                 foreach (var task in taskAccountGroup.Tasks.Where(_taskBusinessManager.ShouldSynchronizeTask))
                 {
                     tasks.Add(ProcessTaskChangeAsync(masterTaskGroup, task));
                 }
 
-                await Task.WhenAll(tasks);
+                var results = await Task.WhenAll(tasks);
+
+                anyChanges |= results.Any(r => r);
             }
 
-            foreach (var taskAccountGroup in masterTaskGroup.TaskAccountGroups)
+            if (!anyChanges)
             {
-                await _taskSorter.SortTasksAsync(taskAccountGroup);
+                foreach (var taskAccountGroup in masterTaskGroup.TaskAccountGroups)
+                {
+                    await _taskSorter.SortTasksAsync(taskAccountGroup);
+                } 
             }
 
             await _masterTaskBusinessManager.UpdateAsync(masterTaskGroup.SynchronizationId, masterTaskGroup.MasterTasks);
         }
 
-        private async Task ProcessTaskChangeAsync(MasterTaskGroup masterTaskGroup, Google::Task task)
+        private async Task<bool> ProcessTaskChangeAsync(MasterTaskGroup masterTaskGroup, Google::Task task)
         {
             var masterTask = masterTaskGroup.MasterTasks.Where(mt => mt.TaskMaps.Any(tm => tm.TaskId == task.Id)).FirstOrDefault();
 
@@ -98,6 +105,8 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                     _logger.LogInformation($"Creating task with Title ({task.Title}) for SyncronizationId ({masterTaskGroup.SynchronizationId})");
 
                     masterTaskGroup.MasterTasks.Add(await _taskCreator.CreateNewTaskAsync(task, masterTaskGroup.TaskAccountGroups));
+
+                    return true;
                 }
             }
             else if (!_taskBusinessManager.TasksAreEqual(masterTask, task) && !_updatedMasterTasks.Contains(masterTask.MasterTaskId))
@@ -107,7 +116,11 @@ namespace GoogleTasksSynchronizer.BusinessLogic
                 await _taskUpdater.UpdateTaskAsync(task, masterTask, masterTaskGroup.TaskAccountGroups);
 
                 _updatedMasterTasks.Add(masterTask.MasterTaskId);
+
+                return true;
             }
+
+            return false;
         }
     }
 }
