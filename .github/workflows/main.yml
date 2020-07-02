@@ -9,10 +9,10 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Fetch tags and master for GitVersion
+      - name: Fetch tags and main for GitVersion
         run: |
           git fetch --tags
-          git branch --create-reflog master origin/master
+          git branch --create-reflog main origin/main
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
@@ -32,11 +32,11 @@ jobs:
         run: dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
 
       - name: DotNet Publish
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: dotnet publish ./src/GoogleTasksSynchronizer/GoogleTasksSynchronizer.csproj -c Release -o publish --no-build /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
 
       - uses: Azure/functions-action@v1
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         with:
           app-name: GoogleTaskSynchronizer
           package: publish
