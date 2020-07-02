@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using GoogleTasksSynchronizer.BusinessLogic.Data;
@@ -22,7 +23,7 @@ namespace GoogleTasksSynchronizer.BusinessLogic
         {
             taskAccountGroup = taskAccountGroup ?? throw new ArgumentNullException(nameof(taskAccountGroup));
 
-            if (taskAccountGroup.Tasks.Any(t => t.Updated > DateTime.Now.AddMinutes(-1)))
+            if (taskAccountGroup.Tasks.Any(t => DateTime.Parse(t.Updated, CultureInfo.InvariantCulture) > DateTime.Now.AddMinutes(-1)))
             {
                 return;
             }

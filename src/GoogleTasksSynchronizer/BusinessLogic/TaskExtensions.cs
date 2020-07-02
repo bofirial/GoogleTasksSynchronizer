@@ -6,6 +6,6 @@ namespace GoogleTasksSynchronizer.BusinessLogic
 {
     public static class TaskExtensions
     {
-        public static string GetOrderKey(this Google::Task task) => $"{task?.Due?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "zzzz-zz-zz"}-{task.Title}"; 
+        public static string GetOrderKey(this Google::Task task) => $"{task?.Due ?? "zzzz-zz-zz"}-{task.Title}";
     }
 }

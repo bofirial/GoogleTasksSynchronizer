@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using GoogleTasksSynchronizer.Configuration;
 using GoogleTasksSynchronizer.DataAbstraction;
@@ -38,11 +39,11 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
             task = task ?? throw new ArgumentNullException(nameof(task));
 
             return masterTask.Title == task.Title &&
-                    masterTask.Due == task.Due &&
+                    masterTask.Due == DateTime.Parse(task.Due, CultureInfo.InvariantCulture) &&
                     masterTask.Notes == task.Notes &&
                     masterTask.Status == task.Status &&
                     masterTask.Deleted == task.Deleted &&
-                    masterTask.Completed == task.Completed;
+                    masterTask.Completed == DateTime.Parse(task.Completed, CultureInfo.InvariantCulture);
         }
 
         public bool ShouldSynchronizeTask(Google::Task task)
