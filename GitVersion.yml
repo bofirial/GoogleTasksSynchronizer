@@ -1,9 +1,0 @@
-mode: ContinuousDeployment
-branches:
-  feature:
-    regex: ^(origin[/-])?feature[/-]
-  master:
-    regex: ^(origin[/-])?master
-ignore:
-  sha: []
-merge-message-formats: {}
