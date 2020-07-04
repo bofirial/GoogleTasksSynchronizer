@@ -9,31 +9,18 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Fetch tags and main for GitVersion
-        run: |
-          git fetch --tags
-          git branch --create-reflog main origin/main
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 3.1.100
 
-      - name: Setup GitVersion
-        uses: gittools/actions/setup-gitversion@v0.3.1
-        with:
-          versionSpec: "5.1.x"
-
-      - name: Use GitVersion
-        id: gitversion
-        uses: gittools/actions/execute-gitversion@v0.3.1
-
       - name: DotNet Build
-        run: dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
+        run: dotnet build -c Release
 
       - name: DotNet Publish
         if: github.ref == 'refs/heads/main'
-        run: dotnet publish ./src/GoogleTasksSynchronizer/GoogleTasksSynchronizer.csproj -c Release -o publish --no-build /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
+        run: dotnet publish ./src/GoogleTasksSynchronizer/GoogleTasksSynchronizer.csproj -c Release -o publish --no-build
 
       - uses: Azure/functions-action@v1
         if: github.ref == 'refs/heads/main'
