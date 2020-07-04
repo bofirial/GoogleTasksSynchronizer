@@ -7,13 +7,12 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v1
-
+      - uses: actions/checkout@v2.3.1
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v1.5.0
         with:
-          dotnet-version: 3.1.100
+          dotnet-version: '3.1.x'
 
       - name: DotNet Build
         run: dotnet build -c Release
@@ -22,7 +21,8 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: dotnet publish ./src/GoogleTasksSynchronizer/GoogleTasksSynchronizer.csproj -c Release -o publish --no-build
 
-      - uses: Azure/functions-action@v1
+      - name: Deploy to Azure
+        uses: Azure/functions-action@v1.1.4
         if: github.ref == 'refs/heads/main'
         with:
           app-name: GoogleTaskSynchronizer
