@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using GoogleTasksSynchronizer.BusinessLogic;
 using GoogleTasksSynchronizer.DataAbstraction;
+using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace GoogleTasksSynchronizer
 {

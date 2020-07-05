@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Azure.Storage.Blob;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
 {

@@ -39,11 +39,11 @@ namespace GoogleTasksSynchronizer.BusinessLogic.Data
             task = task ?? throw new ArgumentNullException(nameof(task));
 
             return masterTask.Title == task.Title &&
-                    masterTask.Due == DateTime.Parse(task.Due, CultureInfo.InvariantCulture) &&
+                    masterTask.Due == (task.Due != null ? (DateTime?)DateTime.Parse(task.Due, CultureInfo.InvariantCulture) : null) &&
                     masterTask.Notes == task.Notes &&
                     masterTask.Status == task.Status &&
                     masterTask.Deleted == task.Deleted &&
-                    masterTask.Completed == DateTime.Parse(task.Completed, CultureInfo.InvariantCulture);
+                    masterTask.Completed == (task.Completed != null ? (DateTime?)DateTime.Parse(task.Completed, CultureInfo.InvariantCulture) : null);
         }
 
         public bool ShouldSynchronizeTask(Google::Task task)

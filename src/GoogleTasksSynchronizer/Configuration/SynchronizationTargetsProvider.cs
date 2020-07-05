@@ -26,7 +26,7 @@ namespace GoogleTasksSynchronizer.Configuration
             return Task.FromResult(synchronizationTargets);
         }
 
-        private void ValidateSynchronizationTargets(List<SynchronizationTarget> synchronizationTargets)
+        private static void ValidateSynchronizationTargets(List<SynchronizationTarget> synchronizationTargets)
         {
             if (synchronizationTargets.GroupBy(s => s.TaskListId).Any(t => t.Count() > 1))
             {

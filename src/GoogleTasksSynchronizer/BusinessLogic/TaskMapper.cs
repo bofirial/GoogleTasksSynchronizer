@@ -14,11 +14,11 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             fromTask = fromTask ?? throw new ArgumentNullException(nameof(fromTask));
 
             toTask.Title = fromTask.Title;
-            toTask.Due = JsonConvert.SerializeObject(fromTask.Due);
+            toTask.Due = fromTask.Due != null ? JsonConvert.SerializeObject(fromTask.Due).Trim('"') : null;
             toTask.Notes = fromTask.Notes;
             toTask.Status = fromTask.Status;
             toTask.Deleted = fromTask.Deleted;
-            toTask.Completed = JsonConvert.SerializeObject(fromTask.Completed);
+            toTask.Completed = fromTask.Completed != null ? JsonConvert.SerializeObject(fromTask.Completed).Trim('"') : null;
         }
 
         public void MapTask(MasterTask toTask, Task fromTask)
@@ -27,11 +27,11 @@ namespace GoogleTasksSynchronizer.BusinessLogic
             fromTask = fromTask ?? throw new ArgumentNullException(nameof(fromTask));
 
             toTask.Title = fromTask.Title;
-            toTask.Due = DateTime.Parse(fromTask.Due, CultureInfo.InvariantCulture);
+            toTask.Due = (fromTask.Due != null ? (DateTime?)DateTime.Parse(fromTask.Due, CultureInfo.InvariantCulture) : null);
             toTask.Notes = fromTask.Notes;
             toTask.Status = fromTask.Status;
             toTask.Deleted = fromTask.Deleted;
-            toTask.Completed = DateTime.Parse(fromTask.Completed, CultureInfo.InvariantCulture);
+            toTask.Completed = (fromTask.Completed != null ? (DateTime?)DateTime.Parse(fromTask.Completed, CultureInfo.InvariantCulture) : null);
         }
     }
 }
