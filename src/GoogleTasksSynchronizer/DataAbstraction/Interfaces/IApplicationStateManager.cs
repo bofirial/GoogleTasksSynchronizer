@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
+using Azure.Storage.Blobs;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
-using Microsoft.Azure.Storage.Blob;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
 {
     public interface IApplicationStateManager
     {
-        Task InitializeFromBindingAsync(CloudBlockBlob applicationStateBlob);
+        Task InitializeFromBindingAsync(BlobClient applicationStateBlob);
 
         Task<ApplicationState> SelectAsync();
 

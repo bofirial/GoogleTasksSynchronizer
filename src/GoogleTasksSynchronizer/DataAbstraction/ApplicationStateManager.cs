@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
 using GoogleTasksSynchronizer.DataAbstraction.Models;
-using Microsoft.Azure.Storage.Blob;
 using Newtonsoft.Json;
 
 namespace GoogleTasksSynchronizer.DataAbstraction
 {
     public class ApplicationStateManager : IApplicationStateManager
     {
-        private CloudBlockBlob _applicationStateBlob;
+        private BlobClient _applicationStateBlob;
         private ApplicationState _applicationState;
 
         private bool _initialized = false;
 
-        public Task InitializeFromBindingAsync(CloudBlockBlob applicationStateBlob)
+        public Task InitializeFromBindingAsync(BlobClient applicationStateBlob)
         {
             _applicationStateBlob = applicationStateBlob;
 
@@ -28,7 +28,9 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             if (_applicationState == null)
             {
-                var rawData = await _applicationStateBlob.DownloadTextAsync();
+                var blobDownloadResult = await _applicationStateBlob.DownloadContentAsync();
+
+                var rawData = blobDownloadResult.Value.Content.ToString();
 
                 return JsonConvert.DeserializeObject<ApplicationState>(rawData);
             }
@@ -44,7 +46,7 @@ namespace GoogleTasksSynchronizer.DataAbstraction
 
             _applicationState = applicationState;
 
-            return _applicationStateBlob.UploadTextAsync(serializedTasksSynchronizerState);
+            return _applicationStateBlob.UploadAsync(BinaryData.FromString(serializedTasksSynchronizerState), overwrite: true);
         }
 
         private void ValidateInitilization()
